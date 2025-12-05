@@ -1,3 +1,6 @@
+// 遊戲網址設定（部署後請更新此連結）
+const GAME_URL = 'YOUR_DEPLOYED_GAME_URL_HERE'; // 部署後請將此連結替換為實際網址
+
 // 語言翻譯
 const translations = {
     zh: {
@@ -1283,21 +1286,25 @@ function goToNextStage() {
     }
 }
 
-// 分享遊戲
+// 分享遊戲到 LINE
 function shareGame() {
     const shareText = gameState.currentLanguage === 'zh' ?
         `🎮 我正在玩國旗王挑戰！快來測試你對世界各國國旗的認識！你能通過所有關卡成為真正的國旗王嗎？🌍👑` :
         `🎮 I'm playing Flag King Challenge! Test your knowledge of world flags! Can you pass all stages and become the true Flag King? 🌍👑`;
 
-    if (navigator.share) {
-        navigator.share({
-            title: gameState.currentLanguage === 'zh' ? '國旗王挑戰' : 'Flag King Challenge',
-            text: shareText
-        });
-    } else {
-        navigator.clipboard.writeText(shareText);
-        alert(gameState.currentLanguage === 'zh' ? '已複製分享文字到剪貼簿！' : 'Share text copied to clipboard!');
+    // 檢查是否有設定遊戲網址
+    if (GAME_URL === 'YOUR_DEPLOYED_GAME_URL_HERE') {
+        alert(gameState.currentLanguage === 'zh' ?
+            '⚠️ 遊戲尚未部署，請先設定遊戲網址！' :
+            '⚠️ Game URL not configured yet!');
+        return;
     }
+
+    // 使用 LINE 分享功能
+    const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(GAME_URL)}`;
+
+    // 開啟 LINE 分享視窗
+    window.open(lineShareUrl, '_blank', 'width=600,height=600');
 }
 
 // 分享成績
