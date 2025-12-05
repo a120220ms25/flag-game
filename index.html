@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國旗王挑戰</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 語言切換按鈕 -->
+        <button id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()">EN</button>
+
+        <h1 id="page-title">🌍 國旗王挑戰 🌍</h1>
+
+        <!-- 遊戲開始畫面 -->
+        <div id="start-screen">
+            <div class="welcome-text">
+                <h2 id="welcome-title">歡迎來到國旗王挑戰！</h2>
+                <p id="welcome-subtitle">測試您對世界各國國旗的認識</p>
+
+                <!-- 名稱輸入 -->
+                <div class="name-input-section">
+                    <label id="name-label">請輸入您的名稱：</label>
+                    <input type="text" id="name-input" placeholder="輸入名稱" maxlength="20">
+                </div>
+
+                <button id="enter-stage-btn" class="btn btn-primary" onclick="enterStageSelect()">🎮 進入闖關模式</button>
+            </div>
+        </div>
+
+        <!-- 關卡選擇畫面 -->
+        <div id="stage-select-screen" class="hidden">
+            <h2 id="stage-select-title">🎯 選擇關卡</h2>
+            <p id="stage-select-subtitle">通過每個關卡解鎖下一關！</p>
+
+            <div id="stages-container" class="stages-container">
+                <!-- 關卡將由 JavaScript 動態生成 -->
+            </div>
+
+            <button id="back-to-start-btn" class="btn btn-secondary" onclick="backToStart()">返回</button>
+        </div>
+
+        <!-- 遊戲進行畫面 -->
+        <div id="game-screen" class="hidden">
+            <!-- 遊戲狀態列 -->
+            <div class="game-status">
+                <div class="status-item">
+                    <span class="label" id="question-label">題號：</span>
+                    <span id="question-number">1</span>/<span id="total-questions">10</span>
+                </div>
+                <div class="status-item">
+                    <span class="label" id="score-label">得分：</span>
+                    <span id="current-score">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="label" id="lives-label">剩餘機會：</span>
+                    <span id="lives">❤️❤️❤️</span>
+                </div>
+                <div class="status-item">
+                    <span class="label" id="max-score-label">本題最高分：</span>
+                    <span id="max-score">10</span>
+                </div>
+            </div>
+
+            <!-- 國旗顯示區 -->
+            <div class="flag-display">
+                <div id="flag-emoji">🇹🇼</div>
+                <p class="question-text" id="question-text">請猜猜這是哪個國家的國旗？</p>
+            </div>
+
+            <!-- 提示區域 -->
+            <div id="hints-area" class="hints-area">
+                <div id="hint1" class="hint hidden"></div>
+                <div id="hint2" class="hint hidden"></div>
+                <div id="hint3" class="hint hidden"></div>
+                <div id="hint4" class="hint hidden"></div>
+                <div id="hint5" class="hint hidden"></div>
+            </div>
+
+            <!-- 回饋訊息區 -->
+            <div id="feedback" class="feedback hidden"></div>
+
+            <!-- 選項按鈕區 -->
+            <div class="options-area" id="options-area">
+                <!-- 選項將由 JavaScript 動態生成 -->
+            </div>
+
+            <!-- 提示按鈕區 -->
+            <div class="hint-buttons">
+                <button id="hint-btn-1" class="btn btn-hint" onclick="showHint(1)">提示 1</button>
+                <button id="hint-btn-2" class="btn btn-hint" onclick="showHint(2)">提示 2</button>
+                <button id="hint-btn-3" class="btn btn-hint" onclick="showHint(3)">提示 3</button>
+                <button id="hint-btn-4" class="btn btn-hint" onclick="showHint(4)">提示 4</button>
+                <button id="hint-btn-5" class="btn btn-hint" onclick="showHint(5)">提示 5</button>
+            </div>
+
+            <!-- 下一題按鈕 -->
+            <button id="next-btn" class="btn btn-primary hidden" onclick="nextQuestion()">下一題</button>
+        </div>
+
+        <!-- 遊戲結束畫面 -->
+        <div id="end-screen" class="hidden">
+            <h2 id="end-title">遊戲結束！</h2>
+            <div class="final-result">
+                <div class="final-score">
+                    <h3 id="final-score-label">最終得分</h3>
+                    <div id="final-score-value">0</div>
+                </div>
+                <div class="title-section">
+                    <h3 id="title-label">您的國旗頭銜</h3>
+                    <div id="title-badge"></div>
+                    <p id="title-description"></p>
+                </div>
+            </div>
+            <div class="end-buttons">
+                <button id="next-stage-btn" class="btn btn-primary hidden" onclick="goToNextStage()">🚀 前往下一關</button>
+                <button id="back-to-stage-btn" class="btn btn-primary" onclick="backToStageSelect()">返回關卡選擇</button>
+                <button id="share-game-btn" class="btn btn-secondary" onclick="shareGame()">📤 分享遊戲</button>
+            </div>
+        </div>
+
+        <!-- 排行榜畫面 -->
+        <div id="leaderboard-screen" class="hidden">
+            <h2 id="leaderboard-title">🏆 排行榜</h2>
+
+            <!-- 難度選擇器 -->
+            <div class="leaderboard-filter">
+                <button class="filter-btn active" onclick="filterLeaderboard('all', this)">
+                    <span id="filter-all">全部</span>
+                </button>
+                <button class="filter-btn" onclick="filterLeaderboard('beginner', this)">
+                    <span id="filter-beginner">初級</span>
+                </button>
+                <button class="filter-btn" onclick="filterLeaderboard('intermediate', this)">
+                    <span id="filter-intermediate">中級</span>
+                </button>
+                <button class="filter-btn" onclick="filterLeaderboard('advanced', this)">
+                    <span id="filter-advanced">高級</span>
+                </button>
+            </div>
+
+            <div class="leaderboard-content">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>玩家</th>
+                            <th>難度</th>
+                            <th>得分</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 排行榜數據將由 JavaScript 動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+            <button id="back-btn" class="btn btn-primary" onclick="backToStart()">返回遊戲</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
