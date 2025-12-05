@@ -196,10 +196,10 @@ const stageConfig = [
     {
         id: 5,
         name: { zh: '👑 國旗王者終極試煉', en: '👑 Flag King Ultimate Trial' },
-        description: { zh: '只有最冷門的國家！成為真正的國旗王！', en: 'Only the most obscure countries! Become the true Flag King!' },
+        description: { zh: '世界人口最少的國家！挑戰真正的國旗王！', en: 'World\'s least populated countries! True Flag King challenge!' },
         totalQuestions: 15,
         requiredCorrect: 12,
-        difficulties: ['advanced'], // 只有高級（最難）
+        difficulties: ['rarest'], // 極稀有難度（世界人口最少的國家）
         lives: 2
     }
 ];
@@ -541,6 +541,173 @@ const flagDatabase = [
         },
         bgGradient: 'linear-gradient(135deg, #00247D 0%, #FFFFFF 50%, #CC142B 100%)', difficulty: 'advanced'
     },
+
+    // ============ 極稀有難度 (15個) - 世界人口最少的國家 ============
+    {
+        emoji: '🇻🇦', name: '梵蒂岡', nameEn: 'Vatican City',
+        hints: {
+            continent: { zh: '歐洲（教宗的家）⛪', en: 'Europe (Pope\'s house) ⛪' },
+            capital: { zh: '梵蒂岡城（整個國家都是首都）🏛️', en: 'Vatican City (whole country is capital) 🏛️' },
+            food: { zh: '披薩？意大利麵？其實很少人住這裡 🍝', en: 'Pizza? Pasta? Actually very few people live here 🍝' },
+            landmark: { zh: '聖彼得大教堂（超級壯觀）⛪', en: 'St. Peter\'s Basilica (super magnificent) ⛪' },
+            other: { zh: '世界最小國家，只有800人！人口比7-11員工還少！', en: 'World\'s smallest country, only 800 people! Less than 7-11 staff!' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FFD700 0%, #FFFFFF 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇳🇷', name: '諾魯', nameEn: 'Nauru',
+        hints: {
+            continent: { zh: '大洋洲（最小島國）🏝️', en: 'Oceania (smallest island nation) 🏝️' },
+            capital: { zh: '亞倫（沒有正式首都）🤷', en: 'Yaren (no official capital) 🤷' },
+            food: { zh: '主要吃罐頭，肥胖率世界第一！🍔', en: 'Mostly canned food, #1 obesity rate! 🍔' },
+            landmark: { zh: '鳥糞礦場（曾經超有錢）💩', en: 'Guano mines (used to be super rich) 💩' },
+            other: { zh: '人口1.2萬，開車環島只要20分鐘！🚗', en: '12k people, drive around island in 20 mins! 🚗' }
+        },
+        bgGradient: 'linear-gradient(135deg, #002170 0%, #FFC61E 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇹🇻', name: '吐瓦魯', nameEn: 'Tuvalu',
+        hints: {
+            continent: { zh: '大洋洲（快要沉沒的國家）🌊', en: 'Oceania (sinking nation) 🌊' },
+            capital: { zh: '富納富提（海平面上升中）😰', en: 'Funafuti (sea level rising) 😰' },
+            food: { zh: '椰子、魚、taro芋頭 🥥', en: 'Coconuts, fish, taro 🥥' },
+            landmark: { zh: '沒什麼特別的，整個國家都在海裡了 🏊', en: 'Nothing special, whole country underwater soon 🏊' },
+            other: { zh: '賣網域名稱 .tv 賺錢！人口1.1萬！📺', en: 'Makes money selling .tv domain! 11k people! 📺' }
+        },
+        bgGradient: 'linear-gradient(135deg, #0093DD 0%, #FFFFFF 50%, #CE1126 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇵🇼', name: '帛琉', nameEn: 'Palau',
+        hints: {
+            continent: { zh: '大洋洲（水母湖聖地）🪼', en: 'Oceania (Jellyfish Lake heaven) 🪼' },
+            capital: { zh: '恩吉魯穆德（超難唸）😅', en: 'Ngerulmud (impossible to pronounce) 😅' },
+            food: { zh: '海鮮、蝙蝠湯（敢喝嗎？）🦇', en: 'Seafood, bat soup (dare to try?) 🦇' },
+            landmark: { zh: '水母湖、藍洞（潛水天堂）🤿', en: 'Jellyfish Lake, Blue Hole (diving paradise) 🤿' },
+            other: { zh: '人口1.8萬，台灣人最愛去的免簽國！🏖️', en: '18k people, Taiwanese favorite visa-free spot! 🏖️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #4AADD6 0%, #FFDE00 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇸🇲', name: '聖馬利諾', nameEn: 'San Marino',
+        hints: {
+            continent: { zh: '歐洲（被意大利包圍）🇮🇹', en: 'Europe (surrounded by Italy) 🇮🇹' },
+            capital: { zh: '聖馬利諾城（山上的小國）⛰️', en: 'San Marino City (tiny mountain nation) ⛰️' },
+            food: { zh: '基本上就是意大利菜 🍝', en: 'Basically Italian food 🍝' },
+            landmark: { zh: '三座城堡在山頂上 🏰', en: 'Three castles on mountaintop 🏰' },
+            other: { zh: '人口3.4萬，世界最古老共和國！🏛️', en: '34k people, world\'s oldest republic! 🏛️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #5EB6E4 0%, #FFFFFF 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇱🇮', name: '列支敦士登', nameEn: 'Liechtenstein',
+        hints: {
+            continent: { zh: '歐洲（瑞士奧地利中間的小國）🏔️', en: 'Europe (tiny country between Swiss & Austria) 🏔️' },
+            capital: { zh: '瓦都茲（迷你首都）🏙️', en: 'Vaduz (mini capital) 🏙️' },
+            food: { zh: 'Käsknöpfle起司餃子、紅酒 🍷', en: 'Käsknöpfle cheese dumplings, wine 🍷' },
+            landmark: { zh: '瓦都茲城堡（王子住的地方）🏰', en: 'Vaduz Castle (prince lives here) 🏰' },
+            other: { zh: '人口3.9萬，超級有錢的稅務天堂！💰', en: '39k people, super rich tax haven! 💰' }
+        },
+        bgGradient: 'linear-gradient(135deg, #002B7F 0%, #CE1126 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇲🇨', name: '摩納哥', nameEn: 'Monaco',
+        hints: {
+            continent: { zh: '歐洲（有錢人的遊樂場）💎', en: 'Europe (rich people playground) 💎' },
+            capital: { zh: '摩納哥（整個國家都是首都）🏙️', en: 'Monaco (whole country is capital) 🏙️' },
+            food: { zh: '法式高級料理（超級貴）🍽️', en: 'French haute cuisine (super expensive) 🍽️' },
+            landmark: { zh: 'F1賽道、蒙地卡羅賭場 🏎️', en: 'F1 track, Monte Carlo Casino 🏎️' },
+            other: { zh: '人口3.9萬，億萬富翁密度世界第一！🤑', en: '39k people, #1 billionaire density! 🤑' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇰🇳', name: '聖克里斯多福及尼維斯', nameEn: 'Saint Kitts and Nevis',
+        hints: {
+            continent: { zh: '北美洲（加勒比海小島）🏝️', en: 'North America (Caribbean tiny island) 🏝️' },
+            capital: { zh: '巴斯特爾（迷你首都）🏖️', en: 'Basseterre (mini capital) 🏖️' },
+            food: { zh: '龍蝦、鹹魚、甘蔗糖 🦞', en: 'Lobster, saltfish, sugarcane 🦞' },
+            landmark: { zh: '硫磺石堡壘（歷史遺跡）🏰', en: 'Brimstone Hill Fortress (historic site) 🏰' },
+            other: { zh: '人口5.3萬，買護照就能移民！💼', en: '53k people, buy passport to immigrate! 💼' }
+        },
+        bgGradient: 'linear-gradient(135deg, #009E49 0%, #CE1126 50%, #FFD100 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇲🇭', name: '馬紹爾群島', nameEn: 'Marshall Islands',
+        hints: {
+            continent: { zh: '大洋洲（珊瑚礁環礁）🐠', en: 'Oceania (coral atolls) 🐠' },
+            capital: { zh: '馬朱羅（海平面很低）🌊', en: 'Majuro (very low sea level) 🌊' },
+            food: { zh: '麵包果、椰子蟹、魚 🥥', en: 'Breadfruit, coconut crab, fish 🥥' },
+            landmark: { zh: '比基尼環礁（核試驗場）☢️', en: 'Bikini Atoll (nuclear test site) ☢️' },
+            other: { zh: '人口5.9萬，泳裝bikini就是這裡命名的！👙', en: '59k people, bikini swimsuit named after here! 👙' }
+        },
+        bgGradient: 'linear-gradient(135deg, #003893 0%, #FFFFFF 50%, #DD7500 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇩🇲', name: '多米尼克', nameEn: 'Dominica',
+        hints: {
+            continent: { zh: '北美洲（別跟多明尼加搞混）🌴', en: 'North America (don\'t confuse with Dominican Rep) 🌴' },
+            capital: { zh: '羅索（加勒比海秘境）🏝️', en: 'Roseau (Caribbean hidden gem) 🏝️' },
+            food: { zh: '山羊水、麵包果、香蕉 🍌', en: 'Goat water, breadfruit, bananas 🍌' },
+            landmark: { zh: '沸騰湖（世界第二大）🌋', en: 'Boiling Lake (world\'s 2nd largest) 🌋' },
+            other: { zh: '人口7.2萬，神鬼奇航在這拍的！🏴‍☠️', en: '72k people, Pirates of Caribbean filmed here! 🏴‍☠️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #006B3F 0%, #FFD100 50%, #000000 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇦🇩', name: '安道爾', nameEn: 'Andorra',
+        hints: {
+            continent: { zh: '歐洲（法國西班牙中間）⛷️', en: 'Europe (between France & Spain) ⛷️' },
+            capital: { zh: '安道爾城（滑雪勝地）🎿', en: 'Andorra la Vella (ski resort) 🎿' },
+            food: { zh: '燉肉Escudella、法式西班牙混合菜 🍲', en: 'Escudella stew, French-Spanish fusion 🍲' },
+            landmark: { zh: '庇里牛斯山滑雪場 🏔️', en: 'Pyrenees ski slopes 🏔️' },
+            other: { zh: '人口7.9萬，免稅購物天堂！🛍️', en: '79k people, tax-free shopping paradise! 🛍️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #0018A8 0%, #FFD100 50%, #D50032 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇦🇬', name: '安地卡及巴布達', nameEn: 'Antigua and Barbuda',
+        hints: {
+            continent: { zh: '北美洲（365個海灘）🏖️', en: 'North America (365 beaches) 🏖️' },
+            capital: { zh: '聖約翰（加勒比海度假勝地）🌴', en: 'St. John\'s (Caribbean vacation spot) 🌴' },
+            food: { zh: '鴨腿飯Ducana、龍蝦 🦞', en: 'Ducana, lobster 🦞' },
+            landmark: { zh: '尼爾森船塢（海軍歷史）⚓', en: 'Nelson\'s Dockyard (naval history) ⚓' },
+            other: { zh: '人口9.8萬，號稱一年365天每天換海灘！☀️', en: '98k people, 365 beaches for every day! ☀️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #0072C6 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇸🇨', name: '塞席爾', nameEn: 'Seychelles',
+        hints: {
+            continent: { zh: '非洲（印度洋天堂）🏝️', en: 'Africa (Indian Ocean paradise) 🏝️' },
+            capital: { zh: '維多利亞（世界最小首都之一）🏙️', en: 'Victoria (one of world\'s smallest capitals) 🏙️' },
+            food: { zh: '克里奧咖哩、椰子咖哩、魚 🐟', en: 'Creole curry, coconut curry, fish 🐟' },
+            landmark: { zh: '拉迪格島（絕美海灘）🌊', en: 'La Digue Island (stunning beaches) 🌊' },
+            other: { zh: '人口9.8萬，蜜月聖地超級美！💑', en: '98k people, honeymoon destination super beautiful! 💑' }
+        },
+        bgGradient: 'linear-gradient(135deg, #003F87 0%, #FCD856 50%, #D62828 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇻🇨', name: '聖文森及格瑞那丁', nameEn: 'Saint Vincent and the Grenadines',
+        hints: {
+            continent: { zh: '北美洲（加勒比小島鏈）🏝️', en: 'North America (Caribbean island chain) 🏝️' },
+            capital: { zh: '金斯敦（火山島）🌋', en: 'Kingstown (volcanic island) 🌋' },
+            food: { zh: '麵包果、烤香蕉、魚湯 🐟', en: 'Breadfruit, roasted plantains, fish soup 🐟' },
+            landmark: { zh: '蘇弗里耶火山（還在活動）🌋', en: 'La Soufrière volcano (still active) 🌋' },
+            other: { zh: '人口11.1萬，神鬼奇航拍攝地！🏴‍☠️', en: '111k people, Pirates of Caribbean location! 🏴‍☠️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #0072C6 0%, #FFD100 50%, #009E49 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇬🇩', name: '格瑞那達', nameEn: 'Grenada',
+        hints: {
+            continent: { zh: '北美洲（香料之島）🌶️', en: 'North America (Spice Isle) 🌶️' },
+            capital: { zh: '聖喬治（彩色房子超美）🎨', en: 'St. George\'s (colorful houses gorgeous) 🎨' },
+            food: { zh: '肉豆蔻、可可、Oil Down燉菜 🥘', en: 'Nutmeg, cocoa, Oil Down stew 🥘' },
+            landmark: { zh: '大安斯海灘（世界最美海灘）🏖️', en: 'Grand Anse Beach (world\'s most beautiful) 🏖️' },
+            other: { zh: '人口11.3萬，世界肉豆蔻產量第二！🌰', en: '113k people, #2 nutmeg producer! 🌰' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFD100 50%, #007A5E 100%)', difficulty: 'rarest'
+    },
 ];
 
 // 遊戲狀態
@@ -560,6 +727,7 @@ let gameState = {
     questions: [],
     currentAnswer: null,
     currentOptions: [],
+    completedStages: [], // 已通過的關卡列表
     unlockedStages: 1 // 已解鎖的最高關卡
 };
 
@@ -826,13 +994,15 @@ function loadStageProgress() {
     if (savedProgress) {
         const progress = JSON.parse(savedProgress);
         gameState.unlockedStages = progress.unlockedStages || 1;
+        gameState.completedStages = progress.completedStages || []; // 已通過的關卡列表
     }
 }
 
 // 儲存關卡進度
 function saveStageProgress() {
     const progress = {
-        unlockedStages: gameState.unlockedStages
+        unlockedStages: gameState.unlockedStages,
+        completedStages: gameState.completedStages || []
     };
     localStorage.setItem('flagGameStageProgress', JSON.stringify(progress));
 }
@@ -862,8 +1032,9 @@ function renderStages() {
     const container = document.getElementById('stages-container');
     container.innerHTML = '';
 
-    stageConfig.forEach((stage, index) => {
+    stageConfig.forEach((stage) => {
         const isUnlocked = stage.id <= gameState.unlockedStages;
+        const isCompleted = gameState.completedStages.includes(stage.id); // 是否已通過
         const card = document.createElement('div');
         card.className = `stage-card ${isUnlocked ? 'unlocked' : 'locked'}`;
 
@@ -873,10 +1044,20 @@ function renderStages() {
 
         const lang = gameState.currentLanguage;
 
+        // 顯示邏輯：通過顯示✅，解鎖但未通過顯示🎮，未解鎖顯示🔒
+        let statusIcon;
+        if (isCompleted) {
+            statusIcon = '✅';
+        } else if (isUnlocked) {
+            statusIcon = '🎮';
+        } else {
+            statusIcon = '🔒';
+        }
+
         card.innerHTML = `
             <div class="stage-header">
                 <div class="stage-name">${stage.name[lang]}</div>
-                <div class="stage-lock">${isUnlocked ? '✅' : '🔒'}</div>
+                <div class="stage-lock">${statusIcon}</div>
             </div>
             <div class="stage-description">${stage.description[lang]}</div>
             <div class="stage-info">
@@ -1076,15 +1257,19 @@ function endGame() {
                     `你答對了 ${gameState.correctAnswers} 題，獲得 ${gameState.totalScore} 分！` :
                     `You got ${gameState.correctAnswers} correct, scored ${gameState.totalScore} points!`;
 
-                // 解鎖下一關
+                // 記錄通過並解鎖下一關
+                if (!gameState.completedStages.includes(gameState.currentStage)) {
+                    gameState.completedStages.push(gameState.currentStage);
+                }
                 if (gameState.currentStage >= gameState.unlockedStages) {
                     gameState.unlockedStages = gameState.currentStage + 1;
-                    saveStageProgress();
-
-                    description += gameState.currentLanguage === 'zh' ?
-                        '\n\n✨ 下一關已解鎖！' :
-                        '\n\n✨ Next stage unlocked!';
                 }
+                saveStageProgress();
+
+                description += gameState.currentLanguage === 'zh' ?
+                    '\n\n✨ 下一關已解鎖！' :
+                    '\n\n✨ Next stage unlocked!';
+
             }
         } else {
             // 失敗
