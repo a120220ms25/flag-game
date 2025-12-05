@@ -1455,6 +1455,20 @@ function backToStart() {
     resetBackground();
 }
 
+// 停止挑戰（回到關卡選擇畫面）
+function quitChallenge() {
+    const confirmMessage = gameState.currentLanguage === 'zh' ?
+        '確定要停止挑戰嗎？目前進度將不會被保存！' :
+        'Are you sure you want to quit? Current progress will not be saved!';
+
+    if (confirm(confirmMessage)) {
+        gameScreen.classList.add('hidden');
+        stageSelectScreen.classList.remove('hidden');
+        renderStages();
+        resetBackground();
+    }
+}
+
 // 返回關卡選擇畫面
 function backToStageSelect() {
     endScreen.classList.add('hidden');

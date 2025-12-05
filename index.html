@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 品牌標誌 -->
+    <div class="brand-logo">VIBECODING GAMES BY SABRINA</div>
+
     <div class="container">
         <!-- 語言切換按鈕 -->
         <button id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()">EN</button>
@@ -99,8 +102,11 @@
                 <button id="hint-btn-5" class="btn btn-hint" onclick="showHint(5)">提示 5</button>
             </div>
 
-            <!-- 下一題按鈕 -->
-            <button id="next-btn" class="btn btn-primary hidden" onclick="nextQuestion()">下一題</button>
+            <!-- 下一題和停止按鈕 -->
+            <div class="game-control-buttons">
+                <button id="next-btn" class="btn btn-primary hidden" onclick="nextQuestion()">下一題</button>
+                <button id="quit-btn" class="btn btn-secondary" onclick="quitChallenge()">⏸️ 停止挑戰</button>
+            </div>
         </div>
 
         <!-- 遊戲結束畫面 -->
