@@ -259,8 +259,8 @@ const AchievementManager = {
         notification.innerHTML = `
             <div class="achievement-icon">🏆</div>
             <div class="achievement-content">
-                <div class="achievement-title">${achievement.name[gameState.currentLanguage]}</div>
-                <div class="achievement-desc">${achievement.description[gameState.currentLanguage]}</div>
+                <div class="achievement-title">${achievement.name.zh}</div>
+                <div class="achievement-desc">${achievement.description.zh}</div>
             </div>
         `;
         document.body.appendChild(notification);
@@ -297,6 +297,79 @@ const AchievementManager = {
             unlocked,
             percentage: Math.round((unlocked / total) * 100)
         };
+    }
+};
+
+// ============ 每日挑戰系統 ============
+const DailyChallengeManager = {
+    STORAGE_KEY: 'flagGameDailyChallenge',
+
+    // 獲取今日日期字串 (YYYY-MM-DD)
+    getTodayDateString() {
+        const today = new Date();
+        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    },
+
+    // 使用日期作為種子生成隨機數
+    seededRandom(seed) {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    },
+
+    // 生成今日挑戰題目（10 題，混合難度）
+    generateTodayQuestions() {
+        const dateStr = this.getTodayDateString();
+        const seed = dateStr.split('-').reduce((acc, num) => acc + parseInt(num), 0);
+
+        // 使用種子隨機選擇 10 個國家
+        const selectedIndices = [];
+        let currentSeed = seed;
+
+        while (selectedIndices.length < 10) {
+            currentSeed++;
+            const randomIndex = Math.floor(this.seededRandom(currentSeed) * flagDatabase.length);
+            if (!selectedIndices.includes(randomIndex)) {
+                selectedIndices.push(randomIndex);
+            }
+        }
+
+        return selectedIndices.map(i => flagDatabase[i]);
+    },
+
+    // 檢查今日是否已完成
+    isTodayCompleted() {
+        const data = this.loadData();
+        return data.completedDate === this.getTodayDateString();
+    },
+
+    // 獲取今日最佳成績
+    getTodayBestScore() {
+        const data = this.loadData();
+        if (data.completedDate === this.getTodayDateString()) {
+            return data.score || 0;
+        }
+        return 0;
+    },
+
+    // 儲存今日挑戰成績
+    saveTodayScore(score) {
+        const data = {
+            completedDate: this.getTodayDateString(),
+            score: score,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+    },
+
+    // 載入資料
+    loadData() {
+        const data = localStorage.getItem(this.STORAGE_KEY);
+        return data ? JSON.parse(data) : { completedDate: null, score: 0 };
+    },
+
+    // 重置（用於測試）
+    reset() {
+        localStorage.removeItem(this.STORAGE_KEY);
     }
 };
 
@@ -401,7 +474,7 @@ const ProgressManager = {
         } catch (e) {
             console.error('載入設定失敗:', e);
         }
-        return { language: 'zh' };
+        return {};
     },
 
     // 保存排行榜
@@ -446,207 +519,208 @@ const ProgressManager = {
     }
 };
 
-// 語言翻譯
-const translations = {
-    zh: {
-        title: '🌍 國旗王挑戰 🌍',
-        welcome: '歡迎來到國旗王挑戰！',
-        subtitle: '測試您對世界各國國旗的認識',
-        enterName: '請輸入您的名稱：',
-        namePlaceholder: '輸入名稱',
-        selectDifficulty: '選擇難度：',
-        beginner: '初級',
-        intermediate: '中級',
-        advanced: '高級',
-        beginnerDesc: '10 題 | 熟悉的國家',
-        intermediateDesc: '10 題 | 中等難度',
-        advancedDesc: '10 題 | 冷門國家',
-        startGame: '開始遊戲',
-        rules: '遊戲規則：',
-        rulesContent: [
-            '根據難度進行國旗辨識挑戰',
-            '初始擁有 3 次猜錯機會',
-            '每題基礎分數：10 分',
-            '可使用提示，但會降低得分：',
-            '使用 1 次提示：最高 7 分',
-            '使用 2 次提示：最高 4 分',
-            '答對獲得分數，答錯失去一次機會'
-        ],
-        questionNumber: '題號：',
-        score: '得分：',
-        lives: '剩餘機會：',
-        maxScore: '本題最高分：',
-        question: '請猜猜這是哪個國家的國旗？',
-        hint1Btn: '提示 1（洲別）',
-        hint2Btn: '提示 2（特色）',
-        hint1Text: '💡 提示 1：這個國家位於',
-        hint2Text: '💡 提示 2：',
-        correct: '✅ 正確！這是 {country} 的國旗！獲得 {score} 分！',
-        wrong: '❌ 錯誤！正確答案是：',
-        nextBtn: '下一題',
-        gameOver: '遊戲結束！',
-        finalScore: '最終得分',
-        yourTitle: '您的國旗頭銜',
-        playAgain: '再玩一次',
-        viewLeaderboard: '查看排行榜',
-        shareScore: '分享成績',
-        leaderboardTitle: '🏆 排行榜',
-        backToGame: '返回遊戲',
-        rank: '排名',
-        player: '玩家',
-        difficulty: '難度',
-        noRecords: '暫無記錄',
-        filterAll: '全部',
-        filterBeginner: '初級',
-        filterIntermediate: '中級',
-        filterAdvanced: '高級',
-        clearProgress: '清除所有進度',
-        titles: {
-            cosmic: '🌌 宇宙旗幟先知',
-            cosmicDesc: '您可能曾經是聯合國秘書長！對世界各國國旗瞭若指掌！',
-            diplomat: '🏛️ 國際外交官僚',
-            diplomatDesc: '國旗是您桌上的每日咖啡墊，您對世界地理有深厚的認識！',
-            collector: '🎨 細節控國徽收藏家',
-            collectorDesc: '您知道哪些國旗上有武器，哪些有植物，對細節有敏銳觀察！',
-            traveler: '🧭 迷航世界旅人',
-            travelerDesc: '您知道這些旗幟存在，但有時忘了它們在哪個洲，繼續加油！',
-            sailor: '🏴‍☠️ 海盜船見習水手',
-            sailorDesc: '您只認得骷髏旗，需要重讀世界地圖。不要氣餒，多練習就會進步！'
-        },
-        continents: {
-            '亞洲': '亞洲',
-            '歐洲': '歐洲',
-            '非洲': '非洲',
-            '北美洲': '北美洲',
-            '南美洲': '南美洲',
-            '大洋洲': '大洋洲',
-            '歐洲/亞洲': '歐洲/亞洲'
-        }
-    },
-    en: {
-        title: '🌍 Flag King Challenge 🌍',
-        welcome: 'Welcome to Flag King Challenge!',
-        subtitle: 'Test your knowledge of world flags',
-        enterName: 'Enter your name:',
-        namePlaceholder: 'Enter name',
-        selectDifficulty: 'Select Difficulty:',
-        beginner: 'Beginner',
-        intermediate: 'Intermediate',
-        advanced: 'Advanced',
-        beginnerDesc: '10 Questions | Familiar Countries',
-        intermediateDesc: '10 Questions | Medium Difficulty',
-        advancedDesc: '10 Questions | Obscure Countries',
-        startGame: 'Start Game',
-        rules: 'Game Rules:',
-        rulesContent: [
-            'Flag identification challenge based on difficulty',
-            'Start with 3 lives',
-            'Base score per question: 10 points',
-            'Hints available but reduce score:',
-            'Use 1 hint: max 7 points',
-            'Use 2 hints: max 4 points',
-            'Correct answer earns points, wrong answer loses a life'
-        ],
-        questionNumber: 'Question:',
-        score: 'Score:',
-        lives: 'Lives:',
-        maxScore: 'Max Score:',
-        question: 'Guess which country this flag belongs to?',
-        hint1Btn: 'Hint 1 (Continent)',
-        hint2Btn: 'Hint 2 (Feature)',
-        hint1Text: '💡 Hint 1: This country is in',
-        hint2Text: '💡 Hint 2:',
-        correct: '✅ Correct! This is the flag of {country}! You earned {score} points!',
-        wrong: '❌ Wrong! The correct answer is:',
-        nextBtn: 'Next Question',
-        gameOver: 'Game Over!',
-        finalScore: 'Final Score',
-        yourTitle: 'Your Flag Title',
-        playAgain: 'Play Again',
-        viewLeaderboard: 'View Leaderboard',
-        shareScore: 'Share Score',
-        leaderboardTitle: '🏆 Leaderboard',
-        backToGame: 'Back to Game',
-        rank: 'Rank',
-        player: 'Player',
-        difficulty: 'Difficulty',
-        noRecords: 'No records yet',
-        filterAll: 'All',
-        filterBeginner: 'Beginner',
-        filterIntermediate: 'Intermediate',
-        filterAdvanced: 'Advanced',
-        clearProgress: 'Clear All Progress',
-        titles: {
-            cosmic: '🌌 Cosmic Flag Prophet',
-            cosmicDesc: 'You might have been a UN Secretary-General! Master of all world flags!',
-            diplomat: '🏛️ International Diplomat',
-            diplomatDesc: 'Flags are your daily coffee coasters. You have deep knowledge of world geography!',
-            collector: '🎨 Detail-Oriented Collector',
-            collectorDesc: 'You know which flags have weapons and which have plants. Sharp eye for details!',
-            traveler: '🧭 Lost World Traveler',
-            travelerDesc: 'You know these flags exist but sometimes forget which continent they\'re from. Keep going!',
-            sailor: '🏴‍☠️ Pirate Ship Apprentice',
-            sailorDesc: 'You only recognize the skull flag and need to re-read the world map. Don\'t give up!'
-        },
-        continents: {
-            '亞洲': 'Asia',
-            '歐洲': 'Europe',
-            '非洲': 'Africa',
-            '北美洲': 'North America',
-            '南美洲': 'South America',
-            '大洋洲': 'Oceania',
-            '歐洲/亞洲': 'Europe/Asia'
-        }
-    }
-};
 
-// 關卡設計（難度遞增：從熟悉到冷門）
-// 每個關卡使用不重複的國家，確保沒有題目重複
+// 20關卡設計 - 世界國旗完整挑戰
 const stageConfig = [
+    // 第1關
     {
         id: 1,
-        name: { zh: '🌱 新手訓練營', en: '🌱 Beginner Camp' },
-        description: { zh: '從熟悉的國家開始你的旅程！', en: 'Start with familiar countries!' },
-        totalQuestions: 5,
-        requiredCorrect: 3,
-        countryIndices: [0, 1, 2, 3, 4], // 台灣、中國、日本、南韓、泰國
+        name: { zh: '入門級觀光客' },
+        description: { zh: '恭喜！您已經從「連自己國家國旗都猜不對」的階段畢業了。' },
+        totalQuestions: 4,
+        requiredCorrect: 2,
+        countryIndices: [0, 1, 2, 3], // 台灣、中國、美國、日本
         lives: 3
     },
+    // 第2關
     {
         id: 2,
-        name: { zh: '🌍 區域探險家', en: '🌍 Regional Explorer' },
-        description: { zh: '探索更多國家的國旗！', en: 'Explore more country flags!' },
-        totalQuestions: 8,
-        requiredCorrect: 5,
-        countryIndices: [5, 6, 7, 8, 9, 10, 11, 12], // 土耳其、希臘、多明尼加、越南、哥倫比亞、美國、新加坡、法國
+        name: { zh: '紅白藍三原色終結者' },
+        description: { zh: '成功區分了所有帶有紅、白、藍的旗子。你的眼睛是 RGB 測色儀嗎？' },
+        totalQuestions: 5,
+        requiredCorrect: 3,
+        countryIndices: [4, 5, 6, 7, 8], // 南韓、泰國、法國、英國、美國等三色旗
         lives: 3
     },
+    // 第3關
     {
         id: 3,
-        name: { zh: '✈️ 環球旅行家', en: '✈️ World Traveler' },
-        description: { zh: '挑戰來自世界各地的國旗！', en: 'Challenge flags from around the world!' },
-        totalQuestions: 10,
-        requiredCorrect: 7,
-        countryIndices: [13, 14, 15, 16, 17, 18, 19, 20, 21, 22], // 英國、義大利、德國、西班牙、巴西、阿根廷、墨西哥、加拿大、澳洲、印度
+        name: { zh: '地圖炮手（自稱）' },
+        description: { zh: '您的知識範圍廣大，雖然準確率...見仁見智。' },
+        totalQuestions: 5,
+        requiredCorrect: 3,
+        countryIndices: [9, 10, 11, 12, 13], // 各大洲代表國家
         lives: 3
     },
+    // 第4關
     {
         id: 4,
-        name: { zh: '🎓 地理學大師', en: '🎓 Geography Master' },
-        description: { zh: '最少人去旅行的國家！你去過幾個？', en: 'Least visited countries! How many have you been to?' },
-        totalQuestions: 12,
-        requiredCorrect: 9,
-        countryIndices: [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34], // 南非、埃及、瑞典、瑞士、荷蘭、葡萄牙、挪威、丹麥、芬蘭、冰島、黎巴嫩、紐西蘭
-        lives: 2
+        name: { zh: '五角星獵人' },
+        description: { zh: '您對五角星的執著，已經讓國際刑警組織開始關注您了。' },
+        totalQuestions: 5,
+        requiredCorrect: 3,
+        countryIndices: [14, 15, 16, 17, 18], // 帶星星的國旗
+        lives: 3
     },
+    // 第5關
     {
         id: 5,
-        name: { zh: '👑 國旗王者終極試煉', en: '👑 Flag King Ultimate Trial' },
-        description: { zh: '世界人口最少的國家！挑戰真正的國旗王！', en: 'World\'s least populated countries! True Flag King challenge!' },
-        totalQuestions: 15,
-        requiredCorrect: 12,
-        countryIndices: [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49], // 所有極稀有國家
+        name: { zh: '順利出關的國際背包客' },
+        description: { zh: '這是證明你在海關不會拿著列支敦斯登國旗，對著瑞士人揮舞的保證。' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [19, 20, 21, 22], // 常見旅遊國家
+        lives: 3
+    },
+    // 第6關
+    {
+        id: 6,
+        name: { zh: '東歐紅白大師' },
+        description: { zh: '您不僅分清了這三面旗幟，您甚至知道它們各自的經緯度。' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [23, 24, 25, 26], // 波蘭、摩納哥、印尼等相似旗幟
         lives: 2
+    },
+    // 第7關
+    {
+        id: 7,
+        name: { zh: '國旗配色審判官' },
+        description: { zh: '您是少數能對國旗的顏色搭配提出「美學批評」的專家。你覺得這配色 OK 嗎？' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [27, 28, 29, 30],
+        lives: 2
+    },
+    // 第8關
+    {
+        id: 8,
+        name: { zh: '三角洲特種部隊' },
+        description: { zh: '專門處理各種三角形、鋸齒邊或複雜徽章組成的旗幟障礙。沒有你攻不破的旗角！' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [31, 32, 33, 34], // 帶三角形的國旗
+        lives: 2
+    },
+    // 第9關
+    {
+        id: 9,
+        name: { zh: '世界國旗耳語者' },
+        description: { zh: '每一面旗幟在你耳邊低語著自己的名字和...設計師的八卦。' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [35, 36, 37, 38],
+        lives: 2
+    },
+    // 第10關
+    {
+        id: 10,
+        name: { zh: '老班的盆栽看守員' },
+        description: { zh: '(來自時空盆栽 B-643 號的感謝) 感謝您沒有在澆水時把我淹死。' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [39, 40, 41, 42],
+        lives: 2
+    },
+    // 第11關
+    {
+        id: 11,
+        name: { zh: '微型國家守護者' },
+        description: { zh: '證明您沒有遺忘那些比您家客廳還小的國家。小國旗，大英雄！' },
+        totalQuestions: 5,
+        requiredCorrect: 4,
+        countryIndices: [43, 44, 45, 46, 47], // 安道爾、列支敦斯登等小國
+        lives: 2
+    },
+    // 第12關
+    {
+        id: 12,
+        name: { zh: '國旗密碼破解員' },
+        description: { zh: '任何帶有盾牌、武器、或動物圖騰的旗幟，對你來說都只是簡單的摩斯密碼。' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [48, 49, 50, 51],
+        lives: 2
+    },
+    // 第13關
+    {
+        id: 13,
+        name: { zh: '順利出海的艦隊司令' },
+        description: { zh: '您現在可以駕駛船艦，精確地辨識海上任何一面旗幟。小心不要被海盜旗騙了。' },
+        totalQuestions: 5,
+        requiredCorrect: 4,
+        countryIndices: [52, 53, 54, 55, 56], // 海島國家
+        lives: 2
+    },
+    // 第14關
+    {
+        id: 14,
+        name: { zh: '地球旗幟學大魔導師' },
+        description: { zh: '你的存在是對國際地理學會最大的威脅。快去向全世界炫耀吧！' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [57, 58, 59, 60],
+        lives: 2
+    },
+    // 第15關
+    {
+        id: 15,
+        name: { zh: '十字架的區分者' },
+        description: { zh: '證明您已經解鎖了所有北歐國家的複雜十字架排列組合。芬蘭、瑞典、挪威...通通搞定！' },
+        totalQuestions: 5,
+        requiredCorrect: 4,
+        countryIndices: [61, 62, 63, 64, 65], // 北歐國家
+        lives: 2
+    },
+    // 第16關
+    {
+        id: 16,
+        name: { zh: '被國旗選中的人' },
+        description: { zh: '您已經無法回頭了，此後您眼中只剩下國旗。連看交通標誌，你都在想是哪國設計的。' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [66, 67, 68, 69],
+        lives: 1
+    },
+    // 第17關
+    {
+        id: 17,
+        name: { zh: '南極洲的遺憾' },
+        description: { zh: '你唯一猜錯的，是一面根本不存在的旗幟。真是太專業了！' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [70, 71, 72, 73],
+        lives: 1
+    },
+    // 第18關
+    {
+        id: 18,
+        name: { zh: '旗幟幾何學家' },
+        description: { zh: '您能計算出旗幟上每條線段的斜率和黃金分割點。沒錯，您就是這麼無聊...我是說專業！' },
+        totalQuestions: 4,
+        requiredCorrect: 3,
+        countryIndices: [74, 75, 76, 77],
+        lives: 1
+    },
+    // 第19關
+    {
+        id: 19,
+        name: { zh: '國旗界 CSI' },
+        description: { zh: '你能從一片布料的纖維組成，判斷它是哪國的棉花。氣味、觸感，都瞞不過你！' },
+        totalQuestions: 5,
+        requiredCorrect: 4,
+        countryIndices: [78, 79, 80, 81, 82],
+        lives: 1
+    },
+    // 第20關 - 最終挑戰
+    {
+        id: 20,
+        name: { zh: '國旗王' },
+        description: { zh: '恭喜！您已征服所有旗幟，正式登基。地球上的旗幟都是您的子民。請接受萬旗朝拜！' },
+        totalQuestions: 5,
+        requiredCorrect: 5,
+        countryIndices: [83, 84, 85, 86, 0], // 最後5個國家 + 回到台灣（象徵完成旅程）
+        lives: 1
     }
 ];
 
@@ -654,7 +728,7 @@ const stageConfig = [
 const flagDatabase = [
     // ============ 初級難度 (10個) - 熟悉的國家 ============
     {
-        emoji: '🇹🇼', name: '台灣', nameEn: 'Taiwan',
+        emoji: '🇹🇼', name: '台灣', nameEn: 'Taiwan', nameJa: '台湾', nameKo: '대만',
         hints: {
             continent: { zh: '亞洲（珍奶發源地那個洲）🧋', en: 'Asia (the bubble tea continent) 🧋' },
             capital: { zh: '台北（永遠在下雨的那個首都）☔', en: 'Taipei (always raining capital) ☔' },
@@ -665,7 +739,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #0000CD 0%, #FF0000 50%, #FFFFFF 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇨🇳', name: '中國', nameEn: 'China',
+        emoji: '🇨🇳', name: '中國', nameEn: 'China', nameJa: '中国', nameKo: '중국',
         hints: {
             continent: { zh: '亞洲（人口爆表那個洲）👨‍👩‍👧‍👦', en: 'Asia (population overflow zone) 👨‍👩‍👧‍👦' },
             capital: { zh: '北京（空氣品質讓你秒懂PM2.5）😷', en: 'Beijing (where you learn what PM2.5 means) 😷' },
@@ -676,7 +750,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #DE2910 0%, #FFDE00 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇯🇵', name: '日本', nameEn: 'Japan',
+        emoji: '🇯🇵', name: '日本', nameEn: 'Japan', nameJa: '日本', nameKo: '일본',
         hints: {
             continent: { zh: '亞洲（動漫聖地）🎌', en: 'Asia (anime paradise) 🎌' },
             capital: { zh: '東京（地鐵複雜到Google Maps都會迷路）🚇', en: 'Tokyo (subway so complex Google Maps gets lost) 🚇' },
@@ -687,7 +761,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FFFFFF 0%, #BC002D 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇰🇷', name: '南韓', nameEn: 'South Korea',
+        emoji: '🇰🇷', name: '南韓', nameEn: 'South Korea', nameJa: '韓国', nameKo: '한국',
         hints: {
             continent: { zh: '亞洲（整形大國）💅', en: 'Asia (plastic surgery capital) 💅' },
             capital: { zh: '首爾（咖啡廳密度破表的城市）☕', en: 'Seoul (cafe density over 9000!) ☕' },
@@ -698,7 +772,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FFFFFF 0%, #003478 50%, #CD2E3A 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇹🇭', name: '泰國', nameEn: 'Thailand',
+        emoji: '🇹🇭', name: '泰國', nameEn: 'Thailand', nameJa: 'タイ', nameKo: '태국',
         hints: {
             continent: { zh: '亞洲（微笑之國但馬殺雞會痛死）😁', en: 'Asia (Land of Smiles but massage hurts!) 😁' },
             capital: { zh: '曼谷（塞車塞到懷疑人生）🚗', en: 'Bangkok (traffic that makes you question life) 🚗' },
@@ -709,7 +783,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #ED1C24 0%, #FFFFFF 50%, #241D4F 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇹🇷', name: '土耳其', nameEn: 'Turkey',
+        emoji: '🇹🇷', name: '土耳其', nameEn: 'Turkey', nameJa: 'トルコ', nameKo: '터키',
         hints: {
             continent: { zh: '歐洲/亞洲（腳踏兩條船的國家）🦶', en: 'Europe/Asia (literally in both continents!) 🦶' },
             capital: { zh: '安卡拉（大家都以為是伊斯坦堡）🤔', en: 'Ankara (everyone thinks it\'s Istanbul) 🤔' },
@@ -720,7 +794,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #E30A17 0%, #FFFFFF 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇬🇷', name: '希臘', nameEn: 'Greece',
+        emoji: '🇬🇷', name: '希臘', nameEn: 'Greece', nameJa: 'ギリシャ', nameKo: '그리스',
         hints: {
             continent: { zh: '歐洲（破產但風景超美）💸', en: 'Europe (broke but beautiful) 💸' },
             capital: { zh: '雅典（古蹟到處都是，走路要小心）🏛️', en: 'Athens (ancient ruins everywhere, watch your step) 🏛️' },
@@ -731,7 +805,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #0D5EAF 0%, #FFFFFF 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇩🇴', name: '多明尼加', nameEn: 'Dominican Republic',
+        emoji: '🇩🇴', name: '多明尼加', nameEn: 'Dominican Republic', nameJa: 'ドミニカ共和国', nameKo: '도미니카 공화국',
         hints: {
             continent: { zh: '北美洲（加勒比海度假天堂）🏖️', en: 'North America (Caribbean vacation paradise) 🏖️' },
             capital: { zh: '聖多明哥（沙灘比辦公室還多）🌴', en: 'Santo Domingo (more beaches than offices) 🌴' },
@@ -742,7 +816,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #002D62 0%, #CE1126 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇻🇳', name: '越南', nameEn: 'Vietnam',
+        emoji: '🇻🇳', name: '越南', nameEn: 'Vietnam', nameJa: 'ベトナム', nameKo: '베트남',
         hints: {
             continent: { zh: '亞洲（河粉王國）🍜', en: 'Asia (pho kingdom) 🍜' },
             capital: { zh: '河內（機車比汽車多100倍）🛵', en: 'Hanoi (100x more scooters than cars) 🛵' },
@@ -753,7 +827,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #DA251D 0%, #FFCD00 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇨🇴', name: '哥倫比亞', nameEn: 'Colombia',
+        emoji: '🇨🇴', name: '哥倫比亞', nameEn: 'Colombia', nameJa: 'コロンビア', nameKo: '콜롬비아',
         hints: {
             continent: { zh: '南美洲（咖啡因上癮者天堂）☕', en: 'South America (caffeine addict paradise) ☕' },
             capital: { zh: '波哥大（海拔2600公尺會喘）🏔️', en: 'Bogota (2600m altitude = breathless) 🏔️' },
@@ -764,7 +838,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FCD116 0%, #003893 50%, #CE1126 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇺🇸', name: '美國', nameEn: 'United States',
+        emoji: '🇺🇸', name: '美國', nameEn: 'United States', nameJa: 'アメリカ', nameKo: '미국',
         hints: {
             continent: { zh: '北美洲（世界警察）🦅', en: 'North America (world police) 🦅' },
             capital: { zh: '華盛頓特區（大家都以為是紐約）🗽', en: 'Washington D.C. (everyone thinks it\'s NYC) 🗽' },
@@ -775,7 +849,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #B22234 0%, #FFFFFF 50%, #3C3B6E 100%)', difficulty: 'beginner'
     },
     {
-        emoji: '🇸🇬', name: '新加坡', nameEn: 'Singapore',
+        emoji: '🇸🇬', name: '新加坡', nameEn: 'Singapore', nameJa: 'シンガポール', nameKo: '싱가포르',
         hints: {
             continent: { zh: '亞洲（花園城市但罰款超多）🌺', en: 'Asia (garden city but fines everywhere) 🌺' },
             capital: { zh: '新加坡（國家就是城市）🏙️', en: 'Singapore (country = city) 🏙️' },
@@ -788,7 +862,7 @@ const flagDatabase = [
 
     // ============ 中級難度 (13個) - 中等知名度國家 ============
     {
-        emoji: '🇫🇷', name: '法國', nameEn: 'France',
+        emoji: '🇫🇷', name: '法國', nameEn: 'France', nameJa: 'フランス', nameKo: '프랑스',
         hints: {
             continent: { zh: '歐洲（浪漫到會翻白眼）💋', en: 'Europe (romantic till you roll eyes) 💋' },
             capital: { zh: '巴黎（鐵塔每小時閃一次燈）✨', en: 'Paris (tower sparkles every hour on the hour) ✨' },
@@ -799,7 +873,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #002395 0%, #FFFFFF 50%, #ED2939 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇬🇧', name: '英國', nameEn: 'United Kingdom',
+        emoji: '🇬🇧', name: '英國', nameEn: 'United Kingdom', nameJa: 'イギリス', nameKo: '영국',
         hints: {
             continent: { zh: '歐洲（脫歐後很孤單）🇪🇺', en: 'Europe (lonely after Brexit) 🇪🇺' },
             capital: { zh: '倫敦（天氣爛到需要隨身帶傘）☂️', en: 'London (weather so bad, carry umbrella 24/7) ☂️' },
@@ -810,7 +884,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #012169 0%, #FFFFFF 50%, #C8102E 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇮🇹', name: '義大利', nameEn: 'Italy',
+        emoji: '🇮🇹', name: '義大利', nameEn: 'Italy', nameJa: 'イタリア', nameKo: '이탈리아',
         hints: {
             continent: { zh: '歐洲（手勢語言比文字還多）🤌', en: 'Europe (more hand gestures than words) 🤌' },
             capital: { zh: '羅馬（到處都是遺跡，挖地鐵會挖到古物）🏛️', en: 'Rome (dig subway, find ancient stuff) 🏛️' },
@@ -821,7 +895,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #009246 0%, #FFFFFF 50%, #CE2B37 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇩🇪', name: '德國', nameEn: 'Germany',
+        emoji: '🇩🇪', name: '德國', nameEn: 'Germany', nameJa: 'ドイツ', nameKo: '독일',
         hints: {
             continent: { zh: '歐洲（準時到變態的國家）⏰', en: 'Europe (punctual to the extreme) ⏰' },
             capital: { zh: '柏林（圍牆拆了但到處賣碎片）🧱', en: 'Berlin (wall gone but selling fragments everywhere) 🧱' },
@@ -832,7 +906,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #000000 0%, #DD0000 50%, #FFCE00 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇪🇸', name: '西班牙', nameEn: 'Spain',
+        emoji: '🇪🇸', name: '西班牙', nameEn: 'Spain', nameJa: 'スペイン', nameKo: '스페인',
         hints: {
             continent: { zh: '歐洲（午睡Siesta文化）💤', en: 'Europe (siesta nap culture) 💤' },
             capital: { zh: '馬德里（晚餐10點才開始吃）🍽️', en: 'Madrid (dinner starts at 10pm) 🍽️' },
@@ -843,7 +917,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #AA151B 0%, #F1BF00 50%, #AA151B 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇧🇷', name: '巴西', nameEn: 'Brazil',
+        emoji: '🇧🇷', name: '巴西', nameEn: 'Brazil', nameJa: 'ブラジル', nameKo: '브라질',
         hints: {
             continent: { zh: '南美洲（森巴舞狂熱）💃', en: 'South America (samba dance mania) 💃' },
             capital: { zh: '巴西利亞（大家都以為是里約）🤷', en: 'Brasilia (everyone thinks it\'s Rio) 🤷' },
@@ -854,7 +928,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #009B3A 0%, #FEDF00 50%, #002776 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇦🇷', name: '阿根廷', nameEn: 'Argentina',
+        emoji: '🇦🇷', name: '阿根廷', nameEn: 'Argentina', nameJa: 'アルゼンチン', nameKo: '아르헨티나',
         hints: {
             continent: { zh: '南美洲（梅西老家）🐐', en: 'South America (Messi\'s home) 🐐' },
             capital: { zh: '布宜諾斯艾利斯（南美巴黎但物價崩潰）💸', en: 'Buenos Aires (Paris of South America, inflation crazy) 💸' },
@@ -865,7 +939,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #74ACDF 0%, #FFFFFF 50%, #74ACDF 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇲🇽', name: '墨西哥', nameEn: 'Mexico',
+        emoji: '🇲🇽', name: '墨西哥', nameEn: 'Mexico', nameJa: 'メキシコ', nameKo: '멕시코',
         hints: {
             continent: { zh: '北美洲（辣椒王國）🌶️', en: 'North America (chili kingdom) 🌶️' },
             capital: { zh: '墨西哥城（地鐵超便宜但塞車爆表）🚇', en: 'Mexico City (metro cheap, traffic nightmare) 🚇' },
@@ -876,7 +950,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #006847 0%, #FFFFFF 50%, #CE1126 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇨🇦', name: '加拿大', nameEn: 'Canada',
+        emoji: '🇨🇦', name: '加拿大', nameEn: 'Canada', nameJa: 'カナダ', nameKo: '캐나다',
         hints: {
             continent: { zh: '北美洲（超級有禮貌Sorry國）🙏', en: 'North America (super polite "sorry" nation) 🙏' },
             capital: { zh: '渥太華（大家都以為是多倫多）❄️', en: 'Ottawa (everyone thinks it\'s Toronto) ❄️' },
@@ -887,7 +961,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FF0000 0%, #FFFFFF 50%, #FF0000 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇦🇺', name: '澳洲', nameEn: 'Australia',
+        emoji: '🇦🇺', name: '澳洲', nameEn: 'Australia', nameJa: 'オーストラリア', nameKo: '호주',
         hints: {
             continent: { zh: '大洋洲（什麼都想咬你）🦘', en: 'Oceania (everything wants to kill you) 🦘' },
             capital: { zh: '坎培拉（大家都以為是雪梨）🦘', en: 'Canberra (everyone thinks it\'s Sydney) 🦘' },
@@ -898,7 +972,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #00008B 0%, #FFFFFF 50%, #FF0000 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇮🇳', name: '印度', nameEn: 'India',
+        emoji: '🇮🇳', name: '印度', nameEn: 'India', nameJa: 'インド', nameKo: '인도',
         hints: {
             continent: { zh: '亞洲（咖哩王國）🍛', en: 'Asia (curry kingdom) 🍛' },
             capital: { zh: '新德里（塞車+牛群=日常）🐄', en: 'New Delhi (traffic + cows = daily life) 🐄' },
@@ -909,7 +983,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FF9933 0%, #FFFFFF 50%, #138808 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇿🇦', name: '南非', nameEn: 'South Africa',
+        emoji: '🇿🇦', name: '南非', nameEn: 'South Africa', nameJa: '南アフリカ', nameKo: '남아프리카',
         hints: {
             continent: { zh: '非洲（彩虹之國）🌈', en: 'Africa (Rainbow Nation) 🌈' },
             capital: { zh: '有3個首都（行政、立法、司法分開）🏛️', en: '3 capitals (executive, legislative, judicial) 🏛️' },
@@ -920,7 +994,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #007A4D 0%, #FFB81C 50%, #DE3831 100%)', difficulty: 'intermediate'
     },
     {
-        emoji: '🇪🇬', name: '埃及', nameEn: 'Egypt',
+        emoji: '🇪🇬', name: '埃及', nameEn: 'Egypt', nameJa: 'エジプト', nameKo: '이집트',
         hints: {
             continent: { zh: '非洲（金字塔之國）🔺', en: 'Africa (land of pyramids) 🔺' },
             capital: { zh: '開羅（人比金字塔還多）🏙️', en: 'Cairo (more people than pyramids) 🏙️' },
@@ -933,7 +1007,7 @@ const flagDatabase = [
 
     // ============ 高級難度 (10個) - 冷門國家 ============
     {
-        emoji: '🇸🇪', name: '瑞典', nameEn: 'Sweden',
+        emoji: '🇸🇪', name: '瑞典', nameEn: 'Sweden', nameJa: 'スウェーデン', nameKo: '스웨덴',
         hints: {
             continent: { zh: '歐洲（IKEA王國）🛋️', en: 'Europe (IKEA kingdom) 🛋️' },
             capital: { zh: '斯德哥爾摩（北歐威尼斯但更冷）🥶', en: 'Stockholm (Nordic Venice but colder) 🥶' },
@@ -944,7 +1018,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #006AA7 0%, #FECC00 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇨🇭', name: '瑞士', nameEn: 'Switzerland',
+        emoji: '🇨🇭', name: '瑞士', nameEn: 'Switzerland', nameJa: 'スイス', nameKo: '스위스',
         hints: {
             continent: { zh: '歐洲（有錢人天堂）💰', en: 'Europe (rich people paradise) 💰' },
             capital: { zh: '伯恩（大家都以為是蘇黎世）🏦', en: 'Bern (everyone thinks it\'s Zurich) 🏦' },
@@ -955,7 +1029,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FF0000 0%, #FFFFFF 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇳🇱', name: '荷蘭', nameEn: 'Netherlands',
+        emoji: '🇳🇱', name: '荷蘭', nameEn: 'Netherlands', nameJa: 'オランダ', nameKo: '네덜란드',
         hints: {
             continent: { zh: '歐洲（腳踏車比人多）🚴', en: 'Europe (more bikes than people) 🚴' },
             capital: { zh: '阿姆斯特丹（運河多到會迷路）🚤', en: 'Amsterdam (so many canals you\'ll get lost) 🚤' },
@@ -966,7 +1040,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #AE1C28 0%, #FFFFFF 50%, #21468B 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇵🇹', name: '葡萄牙', nameEn: 'Portugal',
+        emoji: '🇵🇹', name: '葡萄牙', nameEn: 'Portugal', nameJa: 'ポルトガル', nameKo: '포르투갈',
         hints: {
             continent: { zh: '歐洲（CR7老家）⚽', en: 'Europe (CR7 homeland) ⚽' },
             capital: { zh: '里斯本（電車叮叮超可愛）🚋', en: 'Lisbon (cute trams everywhere) 🚋' },
@@ -977,7 +1051,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #006600 0%, #FF0000 50%, #FFD700 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇳🇴', name: '挪威', nameEn: 'Norway',
+        emoji: '🇳🇴', name: '挪威', nameEn: 'Norway', nameJa: 'ノルウェー', nameKo: '노르웨이',
         hints: {
             continent: { zh: '歐洲（石油富國）🛢️', en: 'Europe (oil rich nation) 🛢️' },
             capital: { zh: '奧斯陸（物價貴到嚇死）💸', en: 'Oslo (prices so high you\'ll cry) 💸' },
@@ -988,7 +1062,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #BA0C2F 0%, #00205B 50%, #FFFFFF 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇩🇰', name: '丹麥', nameEn: 'Denmark',
+        emoji: '🇩🇰', name: '丹麥', nameEn: 'Denmark', nameJa: 'デンマーク', nameKo: '덴마크',
         hints: {
             continent: { zh: '歐洲（快樂指數第一）😊', en: 'Europe (happiest country) 😊' },
             capital: { zh: '哥本哈根（腳踏車天堂）🚲', en: 'Copenhagen (bicycle heaven) 🚲' },
@@ -999,7 +1073,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #C8102E 0%, #FFFFFF 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇫🇮', name: '芬蘭', nameEn: 'Finland',
+        emoji: '🇫🇮', name: '芬蘭', nameEn: 'Finland', nameJa: 'フィンランド', nameKo: '핀란드',
         hints: {
             continent: { zh: '歐洲（桑拿狂熱）🧖', en: 'Europe (sauna obsessed) 🧖' },
             capital: { zh: '赫爾辛基（冬天零下20度）🥶', en: 'Helsinki (winter -20°C) 🥶' },
@@ -1010,7 +1084,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #002F6C 0%, #FFFFFF 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇮🇸', name: '冰島', nameEn: 'Iceland',
+        emoji: '🇮🇸', name: '冰島', nameEn: 'Iceland', nameJa: 'アイスランド', nameKo: '아이슬란드',
         hints: {
             continent: { zh: '歐洲（火山與冰川的瘋狂組合）🌋', en: 'Europe (crazy volcano + glacier combo) 🌋' },
             capital: { zh: '雷克雅維克（世界最北首都）🧭', en: 'Reykjavik (world\'s northernmost capital) 🧭' },
@@ -1021,7 +1095,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #02529C 0%, #FFFFFF 50%, #DC1E35 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇱🇧', name: '黎巴嫩', nameEn: 'Lebanon',
+        emoji: '🇱🇧', name: '黎巴嫩', nameEn: 'Lebanon', nameJa: 'レバノン', nameKo: '레바논',
         hints: {
             continent: { zh: '亞洲（中東夜生活之王）🎉', en: 'Asia (Middle East party king) 🎉' },
             capital: { zh: '貝魯特（中東小巴黎）🏙️', en: 'Beirut (Paris of Middle East) 🏙️' },
@@ -1032,7 +1106,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #EE161F 0%, #FFFFFF 50%, #00A850 100%)', difficulty: 'advanced'
     },
     {
-        emoji: '🇳🇿', name: '紐西蘭', nameEn: 'New Zealand',
+        emoji: '🇳🇿', name: '紐西蘭', nameEn: 'New Zealand', nameJa: 'ニュージーランド', nameKo: '뉴질랜드',
         hints: {
             continent: { zh: '大洋洲（魔戒拍攝地）🧙', en: 'Oceania (LOTR filming location) 🧙' },
             capital: { zh: '威靈頓（風大到會吹走）💨', en: 'Wellington (wind so strong you\'ll fly) 💨' },
@@ -1045,7 +1119,7 @@ const flagDatabase = [
 
     // ============ 極稀有難度 (15個) - 世界人口最少的國家 ============
     {
-        emoji: '🇻🇦', name: '梵蒂岡', nameEn: 'Vatican City',
+        emoji: '🇻🇦', name: '梵蒂岡', nameEn: 'Vatican City', nameJa: 'バチカン市国', nameKo: '바티칸',
         hints: {
             continent: { zh: '歐洲（教宗的家）⛪', en: 'Europe (Pope\'s house) ⛪' },
             capital: { zh: '梵蒂岡城（整個國家都是首都）🏛️', en: 'Vatican City (whole country is capital) 🏛️' },
@@ -1056,7 +1130,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #FFD700 0%, #FFFFFF 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇳🇷', name: '諾魯', nameEn: 'Nauru',
+        emoji: '🇳🇷', name: '諾魯', nameEn: 'Nauru', nameJa: 'ナウル', nameKo: '나우루',
         hints: {
             continent: { zh: '大洋洲（最小島國）🏝️', en: 'Oceania (smallest island nation) 🏝️' },
             capital: { zh: '亞倫（沒有正式首都）🤷', en: 'Yaren (no official capital) 🤷' },
@@ -1067,7 +1141,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #002170 0%, #FFC61E 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇹🇻', name: '吐瓦魯', nameEn: 'Tuvalu',
+        emoji: '🇹🇻', name: '吐瓦魯', nameEn: 'Tuvalu', nameJa: 'ツバル', nameKo: '투발루',
         hints: {
             continent: { zh: '大洋洲（快要沉沒的國家）🌊', en: 'Oceania (sinking nation) 🌊' },
             capital: { zh: '富納富提（海平面上升中）😰', en: 'Funafuti (sea level rising) 😰' },
@@ -1078,7 +1152,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #0093DD 0%, #FFFFFF 50%, #CE1126 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇵🇼', name: '帛琉', nameEn: 'Palau',
+        emoji: '🇵🇼', name: '帛琉', nameEn: 'Palau', nameJa: 'パラオ', nameKo: '팔라우',
         hints: {
             continent: { zh: '大洋洲（水母湖聖地）🪼', en: 'Oceania (Jellyfish Lake heaven) 🪼' },
             capital: { zh: '恩吉魯穆德（超難唸）😅', en: 'Ngerulmud (impossible to pronounce) 😅' },
@@ -1089,7 +1163,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #4AADD6 0%, #FFDE00 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇸🇲', name: '聖馬利諾', nameEn: 'San Marino',
+        emoji: '🇸🇲', name: '聖馬利諾', nameEn: 'San Marino', nameJa: 'サンマリノ', nameKo: '산마리노',
         hints: {
             continent: { zh: '歐洲（被意大利包圍）🇮🇹', en: 'Europe (surrounded by Italy) 🇮🇹' },
             capital: { zh: '聖馬利諾城（山上的小國）⛰️', en: 'San Marino City (tiny mountain nation) ⛰️' },
@@ -1100,7 +1174,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #5EB6E4 0%, #FFFFFF 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇱🇮', name: '列支敦士登', nameEn: 'Liechtenstein',
+        emoji: '🇱🇮', name: '列支敦士登', nameEn: 'Liechtenstein', nameJa: 'リヒテンシュタイン', nameKo: '리히텐슈타인',
         hints: {
             continent: { zh: '歐洲（瑞士奧地利中間的小國）🏔️', en: 'Europe (tiny country between Swiss & Austria) 🏔️' },
             capital: { zh: '瓦都茲（迷你首都）🏙️', en: 'Vaduz (mini capital) 🏙️' },
@@ -1111,7 +1185,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #002B7F 0%, #CE1126 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇲🇨', name: '摩納哥', nameEn: 'Monaco',
+        emoji: '🇲🇨', name: '摩納哥', nameEn: 'Monaco', nameJa: 'モナコ', nameKo: '모나코',
         hints: {
             continent: { zh: '歐洲（有錢人的遊樂場）💎', en: 'Europe (rich people playground) 💎' },
             capital: { zh: '摩納哥（整個國家都是首都）🏙️', en: 'Monaco (whole country is capital) 🏙️' },
@@ -1122,7 +1196,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇰🇳', name: '聖克里斯多福及尼維斯', nameEn: 'Saint Kitts and Nevis',
+        emoji: '🇰🇳', name: '聖克里斯多福及尼維斯', nameEn: 'Saint Kitts and Nevis', nameJa: 'セントクリストファー・ネイビス', nameKo: '세인트키츠 네비스',
         hints: {
             continent: { zh: '北美洲（加勒比海小島）🏝️', en: 'North America (Caribbean tiny island) 🏝️' },
             capital: { zh: '巴斯特爾（迷你首都）🏖️', en: 'Basseterre (mini capital) 🏖️' },
@@ -1133,7 +1207,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #009E49 0%, #CE1126 50%, #FFD100 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇲🇭', name: '馬紹爾群島', nameEn: 'Marshall Islands',
+        emoji: '🇲🇭', name: '馬紹爾群島', nameEn: 'Marshall Islands', nameJa: 'マーシャル諸島', nameKo: '마셜 제도',
         hints: {
             continent: { zh: '大洋洲（珊瑚礁環礁）🐠', en: 'Oceania (coral atolls) 🐠' },
             capital: { zh: '馬朱羅（海平面很低）🌊', en: 'Majuro (very low sea level) 🌊' },
@@ -1144,7 +1218,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #003893 0%, #FFFFFF 50%, #DD7500 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇩🇲', name: '多米尼克', nameEn: 'Dominica',
+        emoji: '🇩🇲', name: '多米尼克', nameEn: 'Dominica', nameJa: 'ドミニカ国', nameKo: '도미니카 연방',
         hints: {
             continent: { zh: '北美洲（別跟多明尼加搞混）🌴', en: 'North America (don\'t confuse with Dominican Rep) 🌴' },
             capital: { zh: '羅索（加勒比海秘境）🏝️', en: 'Roseau (Caribbean hidden gem) 🏝️' },
@@ -1155,7 +1229,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #006B3F 0%, #FFD100 50%, #000000 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇦🇩', name: '安道爾', nameEn: 'Andorra',
+        emoji: '🇦🇩', name: '安道爾', nameEn: 'Andorra', nameJa: 'アンドラ', nameKo: '안도라',
         hints: {
             continent: { zh: '歐洲（法國西班牙中間）⛷️', en: 'Europe (between France & Spain) ⛷️' },
             capital: { zh: '安道爾城（滑雪勝地）🎿', en: 'Andorra la Vella (ski resort) 🎿' },
@@ -1166,7 +1240,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #0018A8 0%, #FFD100 50%, #D50032 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇦🇬', name: '安地卡及巴布達', nameEn: 'Antigua and Barbuda',
+        emoji: '🇦🇬', name: '安地卡及巴布達', nameEn: 'Antigua and Barbuda', nameJa: 'アンティグア・バーブーダ', nameKo: '앤티가 바부다',
         hints: {
             continent: { zh: '北美洲（365個海灘）🏖️', en: 'North America (365 beaches) 🏖️' },
             capital: { zh: '聖約翰（加勒比海度假勝地）🌴', en: 'St. John\'s (Caribbean vacation spot) 🌴' },
@@ -1177,7 +1251,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #0072C6 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇸🇨', name: '塞席爾', nameEn: 'Seychelles',
+        emoji: '🇸🇨', name: '塞席爾', nameEn: 'Seychelles', nameJa: 'セーシェル', nameKo: '세이셸',
         hints: {
             continent: { zh: '非洲（印度洋天堂）🏝️', en: 'Africa (Indian Ocean paradise) 🏝️' },
             capital: { zh: '維多利亞（世界最小首都之一）🏙️', en: 'Victoria (one of world\'s smallest capitals) 🏙️' },
@@ -1188,7 +1262,7 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #003F87 0%, #FCD856 50%, #D62828 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇻🇨', name: '聖文森及格瑞那丁', nameEn: 'Saint Vincent and the Grenadines',
+        emoji: '🇻🇨', name: '聖文森及格瑞那丁', nameEn: 'Saint Vincent and the Grenadines', nameJa: 'セントビンセント・グレナディーン', nameKo: '세인트빈센트 그레나딘',
         hints: {
             continent: { zh: '北美洲（加勒比小島鏈）🏝️', en: 'North America (Caribbean island chain) 🏝️' },
             capital: { zh: '金斯敦（火山島）🌋', en: 'Kingstown (volcanic island) 🌋' },
@@ -1199,23 +1273,433 @@ const flagDatabase = [
         bgGradient: 'linear-gradient(135deg, #0072C6 0%, #FFD100 50%, #009E49 100%)', difficulty: 'rarest'
     },
     {
-        emoji: '🇬🇩', name: '格瑞那達', nameEn: 'Grenada',
+        emoji: '🇬🇩', name: '格瑞那達', nameEn: 'Grenada', nameJa: 'グレナダ', nameKo: '그레나다',
         hints: {
-            continent: { zh: '北美洲（香料之島）🌶️', en: 'North America (Spice Isle) 🌶️' },
-            capital: { zh: '聖喬治（彩色房子超美）🎨', en: 'St. George\'s (colorful houses gorgeous) 🎨' },
-            food: { zh: '肉豆蔻、可可、Oil Down燉菜 🥘', en: 'Nutmeg, cocoa, Oil Down stew 🥘' },
-            landmark: { zh: '大安斯海灘（世界最美海灘）🏖️', en: 'Grand Anse Beach (world\'s most beautiful) 🏖️' },
-            other: { zh: '人口11.3萬，世界肉豆蔻產量第二！🌰', en: '113k people, #2 nutmeg producer! 🌰' }
+            continent: { zh: '北美洲（香料之島）🌶️' },
+            capital: { zh: '聖喬治（彩色房子超美）🎨' },
+            food: { zh: '肉豆蔻、可可、Oil Down燉菜 🥘' },
+            landmark: { zh: '大安斯海灘（世界最美海灘）🏖️' },
+            other: { zh: '人口11.3萬，世界肉豆蔻產量第二！🌰' }
         },
         bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFD100 50%, #007A5E 100%)', difficulty: 'rarest'
+    },
+    // ============ 非洲國家 ============
+    {
+        emoji: '🇪🇬', name: '埃及',
+        hints: {
+            continent: { zh: '非洲（金字塔發源地）🔺' },
+            capital: { zh: '開羅（尼羅河畔）🏜️' },
+            food: { zh: '庫莎里、法拉費爾、烤肉串 🥙' },
+            landmark: { zh: '吉薩金字塔、獅身人面像 🗿' },
+            other: { zh: '人口1億，古文明發源地！📜' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #000000 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇿🇦', name: '南非',
+        hints: {
+            continent: { zh: '非洲（彩虹之國）🌈' },
+            capital: { zh: '三個首都：開普敦、普勒托利亞、布隆泉 🏛️' },
+            food: { zh: 'Biltong肉乾、烤肉Braai 🍖' },
+            landmark: { zh: '桌山、好望角 🏔️' },
+            other: { zh: '人口6000萬，曼德拉的故鄉！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #007A4D 0%, #FFB81C 50%, #001489 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇳🇬', name: '奈及利亞',
+        hints: {
+            continent: { zh: '非洲（人口最多）👨‍👩‍👧‍👦' },
+            capital: { zh: '阿布賈（新首都）🏙️' },
+            food: { zh: 'Jollof飯、Suya烤肉 🍚' },
+            landmark: { zh: '拉各斯（經濟中心）、祖馬岩 🪨' },
+            other: { zh: '人口2.2億，非洲人口第一！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #008751 0%, #FFFFFF 50%, #008751 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇰🇪', name: '肯亞',
+        hints: {
+            continent: { zh: '非洲（野生動物天堂）🦁' },
+            capital: { zh: '奈洛比（東非門戶）🌍' },
+            food: { zh: 'Ugali玉米糊、Nyama Choma烤肉 🥩' },
+            landmark: { zh: '馬賽馬拉、吉力馬札羅山 🏔️' },
+            other: { zh: '人口5400萬，Safari發源地！🦒' }
+        },
+        bgGradient: 'linear-gradient(135deg, #000000 0%, #BB0000 50%, #007A33 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇲🇦', name: '摩洛哥',
+        hints: {
+            continent: { zh: '非洲（北非明珠）🕌' },
+            capital: { zh: '拉巴特（皇城）👑' },
+            food: { zh: '塔吉鍋、庫斯庫斯、薄荷茶 🫖' },
+            landmark: { zh: '馬拉喀什、藍色小鎮舍夫沙萬 🔵' },
+            other: { zh: '人口3700萬，阿拉伯風情超美！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #C1272D 0%, #006233 50%, #C1272D 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇪🇹', name: '衣索比亞',
+        hints: {
+            continent: { zh: '非洲（咖啡發源地）☕' },
+            capital: { zh: '阿迪斯阿貝巴（非洲聯盟總部）🏛️' },
+            food: { zh: '英吉拉薄餅、咖啡儀式 ☕' },
+            landmark: { zh: '拉利貝拉岩石教堂 ⛪' },
+            other: { zh: '人口1.2億，從未被殖民！💪' }
+        },
+        bgGradient: 'linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇬🇭', name: '迦納',
+        hints: {
+            continent: { zh: '非洲（黃金海岸）🏆' },
+            capital: { zh: '阿克拉（西非門戶）🌊' },
+            food: { zh: 'Jollof飯、Fufu木薯糊 🍚' },
+            landmark: { zh: '海岸角城堡（奴隸貿易遺址）🏰' },
+            other: { zh: '人口3200萬，可可產量世界第二！🍫' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FCD116 50%, #006B3F 100%)', difficulty: 'advanced'
+    },
+    // ============ 南美洲國家 ============
+    {
+        emoji: '🇺🇾', name: '烏拉圭',
+        hints: {
+            continent: { zh: '南美洲（足球王國）⚽' },
+            capital: { zh: '蒙特維多（南美瑞士）🏙️' },
+            food: { zh: '烤牛肉Asado、Mate茶 🥩' },
+            landmark: { zh: '埃斯特角城、科洛尼亞老城 🏖️' },
+            other: { zh: '人口340萬，兩屆世界盃冠軍！🏆' }
+        },
+        bgGradient: 'linear-gradient(135deg, #0038A8 0%, #FFFFFF 50%, #FCD116 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇵🇾', name: '巴拉圭',
+        hints: {
+            continent: { zh: '南美洲（內陸國）🌳' },
+            capital: { zh: '亞松森（河港首都）🛶' },
+            food: { zh: 'Sopa paraguaya玉米餅、烤牛肉 🌽' },
+            landmark: { zh: '伊瓜蘇瀑布、耶穌會遺址 💦' },
+            other: { zh: '人口710萬，國旗正反面不同！🚩' }
+        },
+        bgGradient: 'linear-gradient(135deg, #D52B1E 0%, #FFFFFF 50%, #0038A8 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇪🇨', name: '厄瓜多',
+        hints: {
+            continent: { zh: '南美洲（赤道之國）🌎' },
+            capital: { zh: '基多（世界遺產首都）🏔️' },
+            food: { zh: 'Ceviche檸檬魚、炸香蕉 🐟' },
+            landmark: { zh: '加拉巴哥群島（達爾文研究地）🐢' },
+            other: { zh: '人口1800萬，赤道紀念碑超酷！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FFD100 0%, #0072CE 50%, #EF3340 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇧🇴', name: '玻利維亞',
+        hints: {
+            continent: { zh: '南美洲（天空之鏡）✨' },
+            capital: { zh: '拉巴斯（世界最高首都）🏔️' },
+            food: { zh: 'Salteñas餡餅、Llama肉 🥟' },
+            landmark: { zh: '烏尤尼鹽沼（天空之鏡）🪞' },
+            other: { zh: '人口1200萬，鹽沼超夢幻！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #D52B1E 0%, #FFD100 50%, #007934 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇻🇪', name: '委內瑞拉',
+        hints: {
+            continent: { zh: '南美洲（石油王國）🛢️' },
+            capital: { zh: '卡拉卡斯（山城首都）🏙️' },
+            food: { zh: 'Arepa玉米餅、Pabellón燉肉 🌮' },
+            landmark: { zh: '天使瀑布（世界最高瀑布）💦' },
+            other: { zh: '人口2800萬，石油儲量世界第一！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FFD100 0%, #00247D 50%, #CF142B 100%)', difficulty: 'intermediate'
+    },
+    // ============ 中美洲和加勒比海 ============
+    {
+        emoji: '🇨🇺', name: '古巴',
+        hints: {
+            continent: { zh: '北美洲（雪茄之島）🚬' },
+            capital: { zh: '哈瓦那（老爺車之都）🚗' },
+            food: { zh: 'Ropa Vieja燉肉、莫西多調酒 🍹' },
+            landmark: { zh: '老哈瓦那、切·格瓦拉紀念館 🏛️' },
+            other: { zh: '人口1100萬，雪茄和蘭姆酒世界聞名！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #002A8F 0%, #FFFFFF 50%, #CF142B 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇯🇲', name: '牙買加',
+        hints: {
+            continent: { zh: '北美洲（雷鬼音樂發源地）🎵' },
+            capital: { zh: '京斯敦（Bob Marley故鄉）🎸' },
+            food: { zh: 'Jerk Chicken辣雞、Ackee水果 🍗' },
+            landmark: { zh: '鄧恩河瀑布、藍山咖啡產地 ☕' },
+            other: { zh: '人口290萬，短跑王國Usain Bolt！⚡' }
+        },
+        bgGradient: 'linear-gradient(135deg, #009B3A 0%, #FFD100 50%, #000000 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇭🇹', name: '海地',
+        hints: {
+            continent: { zh: '北美洲（第一個黑人共和國）✊' },
+            capital: { zh: '太子港（加勒比海港）🏝️' },
+            food: { zh: 'Griot炸豬肉、Pikliz醃菜 🥩' },
+            landmark: { zh: '城堡拉費里耶（世界遺產）🏰' },
+            other: { zh: '人口1140萬，第一個獨立的黑人國家！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #00209F 0%, #D21034 50%, #00209F 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇩🇴', name: '多明尼加',
+        hints: {
+            continent: { zh: '北美洲（加勒比度假天堂）🏖️' },
+            capital: { zh: '聖多明哥（最古老歐洲城市）🏛️' },
+            food: { zh: 'Sancocho燉湯、Mangu香蕉泥 🍌' },
+            landmark: { zh: 'Punta Cana海灘、殖民區 🌴' },
+            other: { zh: '人口1100萬，棒球強國！⚾' }
+        },
+        bgGradient: 'linear-gradient(135deg, #002D62 0%, #FFFFFF 50%, #CE1126 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇨🇷', name: '哥斯大黎加',
+        hints: {
+            continent: { zh: '北美洲（生態天堂）🦜' },
+            capital: { zh: '聖荷西（咖啡之都）☕' },
+            food: { zh: 'Gallo Pinto飯豆、Casado套餐 🍚' },
+            landmark: { zh: '阿雷納火山、雲霧森林 🌋' },
+            other: { zh: '人口510萬，全球最幸福國家之一！😊' }
+        },
+        bgGradient: 'linear-gradient(135deg, #002B7F 0%, #FFFFFF 50%, #CE1126 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇵🇦', name: '巴拿馬',
+        hints: {
+            continent: { zh: '北美洲（運河之國）🚢' },
+            capital: { zh: '巴拿馬市（金融中心）🏙️' },
+            food: { zh: 'Sancocho雞湯、Ceviche檸檬魚 🐟' },
+            landmark: { zh: '巴拿馬運河（世界工程奇蹟）⚓' },
+            other: { zh: '人口430萬，連接太平洋和大西洋！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #005293 0%, #FFFFFF 50%, #D21034 100%)', difficulty: 'intermediate'
+    },
+    // ============ 更多亞洲國家 ============
+    {
+        emoji: '🇧🇩', name: '孟加拉',
+        hints: {
+            continent: { zh: '亞洲（人口超密集）👥' },
+            capital: { zh: '達卡（紡織工業中心）🏭' },
+            food: { zh: 'Biryani香料飯、Hilsa魚咖哩 🐟' },
+            landmark: { zh: '孫德爾本斯紅樹林、考克斯巴扎爾海灘 🌊' },
+            other: { zh: '人口1.7億，世界最大三角洲！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #006A4E 0%, #F42A41 50%, #006A4E 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇵🇰', name: '巴基斯坦',
+        hints: {
+            continent: { zh: '亞洲（伊斯蘭核武國）☪️' },
+            capital: { zh: '伊斯蘭馬巴德（計畫首都）🕌' },
+            food: { zh: 'Biryani飯、Nihari燉肉、Chapati餅 🍛' },
+            landmark: { zh: 'K2峰（世界第二高）、拉合爾古堡 🏔️' },
+            other: { zh: '人口2.3億，板球超熱門！🏏' }
+        },
+        bgGradient: 'linear-gradient(135deg, #01411C 0%, #FFFFFF 50%, #01411C 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇱🇰', name: '斯里蘭卡',
+        hints: {
+            continent: { zh: '亞洲（錫蘭紅茶之國）☕' },
+            capital: { zh: '可倫坡（商業中心）🏙️' },
+            food: { zh: 'Kottu麵包炒、咖哩、紅茶 🫖' },
+            landmark: { zh: '獅子岩、康提佛牙寺 🦁' },
+            other: { zh: '人口2200萬，世界最好紅茶產地！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FFB81C 0%, #8B0000 50%, #FFB81C 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇲🇲', name: '緬甸',
+        hints: {
+            continent: { zh: '亞洲（千塔之國）🛕' },
+            capital: { zh: '奈比多（新首都）🏛️' },
+            food: { zh: 'Mohinga魚湯麵、茶葉沙拉 🍜' },
+            landmark: { zh: '仰光大金寺、蒲甘佛塔群 ⛩️' },
+            other: { zh: '人口5400萬，翡翠產量世界第一！💎' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FECB00 0%, #34B233 50%, #EA2839 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇰🇭', name: '柬埔寨',
+        hints: {
+            continent: { zh: '亞洲（吳哥窟之國）🛕' },
+            capital: { zh: '金邊（湄公河畔）🏙️' },
+            food: { zh: 'Amok咖哩、炒麵Lok Lak 🍛' },
+            landmark: { zh: '吳哥窟（世界奇蹟）、洞里薩湖 🏛️' },
+            other: { zh: '人口1700萬，高棉文化燦爛！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #032EA1 0%, #E00025 50%, #032EA1 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇱🇦', name: '寮國',
+        hints: {
+            continent: { zh: '亞洲（內陸國佛教國）🙏' },
+            capital: { zh: '永珍（湄公河首都）🏙️' },
+            food: { zh: 'Larb肉末、糯米飯、青木瓜沙拉 🥗' },
+            landmark: { zh: '龍坡邦古城、石缸平原 🏺' },
+            other: { zh: '人口750萬，東南亞唯一內陸國！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #002868 50%, #FFFFFF 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇳🇵', name: '尼泊爾',
+        hints: {
+            continent: { zh: '亞洲（世界屋脊）🏔️' },
+            capital: { zh: '加德滿都（寺廟之城）🕉️' },
+            food: { zh: 'Momo餃子、Dal Bhat扁豆飯 🥟' },
+            landmark: { zh: '聖母峰（世界第一高）、博卡拉湖 ⛰️' },
+            other: { zh: '人口3000萬，世界唯一非矩形國旗！🚩' }
+        },
+        bgGradient: 'linear-gradient(135deg, #DC143C 0%, #003893 50%, #DC143C 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇧🇹', name: '不丹',
+        hints: {
+            continent: { zh: '亞洲（幸福王國）😊' },
+            capital: { zh: '廷布（無紅綠燈首都）🚦' },
+            food: { zh: 'Ema Datshi辣椒起司、紅米 🌶️' },
+            landmark: { zh: '虎穴寺、普納卡宗 🏔️' },
+            other: { zh: '人口78萬，全球最幸福國家！💚' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FF4E12 0%, #FFD520 50%, #FF4E12 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇲🇳', name: '蒙古',
+        hints: {
+            continent: { zh: '亞洲（游牧民族）🐎' },
+            capital: { zh: '烏蘭巴托（草原首都）🏕️' },
+            food: { zh: 'Buuz包子、羊肉、奶茶 🥟' },
+            landmark: { zh: '成吉思汗雕像、戈壁沙漠 🏜️' },
+            other: { zh: '人口340萬，人口密度全球最低！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #DA2032 0%, #0066B3 50%, #DA2032 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇦🇫', name: '阿富汗',
+        hints: {
+            continent: { zh: '亞洲（內陸山國）⛰️' },
+            capital: { zh: '喀布爾（興都庫什山下）🏔️' },
+            food: { zh: 'Kabuli Pilau抓飯、烤肉串 🍚' },
+            landmark: { zh: '巴米揚大佛遺址（已毀）、藍色清真寺 🕌' },
+            other: { zh: '人口4000萬，曾是絲路要道！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #000000 0%, #D32011 50%, #007A3D 100%)', difficulty: 'advanced'
+    },
+    // ============ 中東國家 ============
+    {
+        emoji: '🇮🇶', name: '伊拉克',
+        hints: {
+            continent: { zh: '亞洲（兩河流域文明）🏺' },
+            capital: { zh: '巴格達（千年古城）🕌' },
+            food: { zh: 'Masgouf烤魚、Dolma捲葉 🐟' },
+            landmark: { zh: '巴比倫遺址、兩河流域 🌊' },
+            other: { zh: '人口4200萬，美索不達米亞文明發源地！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #007A3D 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇸🇾', name: '敘利亞',
+        hints: {
+            continent: { zh: '亞洲（古文明搖籃）🏛️' },
+            capital: { zh: '大馬士革（世界最古老首都）🕌' },
+            food: { zh: 'Kibbeh肉丸、Fattoush沙拉 🥗' },
+            landmark: { zh: '帕米拉古城、阿勒坡古堡 🏰' },
+            other: { zh: '人口2200萬，大馬士革玫瑰聞名！🌹' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #007A3D 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇱🇧', name: '黎巴嫩',
+        hints: {
+            continent: { zh: '亞洲（中東巴黎）🌲' },
+            capital: { zh: '貝魯特（地中海明珠）🏖️' },
+            food: { zh: 'Hummus鷹嘴豆泥、Tabbouleh沙拉 🥗' },
+            landmark: { zh: '雪松森林、巴勒貝克神廟 🏛️' },
+            other: { zh: '人口680萬，雪松是國寶！🌲' }
+        },
+        bgGradient: 'linear-gradient(135deg, #EE161F 0%, #FFFFFF 50%, #00A651 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇯🇴', name: '約旦',
+        hints: {
+            continent: { zh: '亞洲（沙漠王國）🏜️' },
+            capital: { zh: '安曼（古羅馬遺址）🏛️' },
+            food: { zh: 'Mansaf羊肉飯、Falafel炸豆丸 🍖' },
+            landmark: { zh: '佩特拉古城（玫瑰之城）、死海 🏺' },
+            other: { zh: '人口1100萬，死海是世界最低點！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #000000 0%, #FFFFFF 50%, #007A3D 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇾🇪', name: '葉門',
+        hints: {
+            continent: { zh: '亞洲（阿拉伯半島南端）🏜️' },
+            capital: { zh: '沙那（世界遺產之城）🕌' },
+            food: { zh: 'Saltah燉肉、Fahsa湯 🍲' },
+            landmark: { zh: '希巴姆古城（沙漠曼哈頓）🏛️' },
+            other: { zh: '人口3200萬，摩卡咖啡發源地！☕' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #000000 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇴🇲', name: '阿曼',
+        hints: {
+            continent: { zh: '亞洲（香料之路）🌶️' },
+            capital: { zh: '馬斯喀特（港口城市）⚓' },
+            food: { zh: 'Shuwa慢烤羊肉、椰棗 🌴' },
+            landmark: { zh: '蘇丹卡布斯大清真寺、尼日瓦堡 🕌' },
+            other: { zh: '人口520萬，乳香產地！' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FFFFFF 0%, #FF0000 50%, #008000 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇰🇼', name: '科威特',
+        hints: {
+            continent: { zh: '亞洲（石油富國）🛢️' },
+            capital: { zh: '科威特市（波斯灣明珠）🏙️' },
+            food: { zh: 'Machboos香料飯、烤羊肉 🍛' },
+            landmark: { zh: '科威特塔、大清真寺 🗼' },
+            other: { zh: '人口430萬，人均GDP超高！💰' }
+        },
+        bgGradient: 'linear-gradient(135deg, #007A3D 0%, #FFFFFF 50%, #CE1126 100%)', difficulty: 'advanced'
+    },
+    {
+        emoji: '🇧🇭', name: '巴林',
+        hints: {
+            continent: { zh: '亞洲（F1賽車之國）🏎️' },
+            capital: { zh: '麥納瑪（金融中心）🏙️' },
+            food: { zh: 'Machboos飯、Muhammar甜米 🍚' },
+            landmark: { zh: 'F1賽道、巴林堡 🏰' },
+            other: { zh: '人口170萬，波斯灣群島國！🏝️' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FFFFFF 0%, #CE1126 50%, #FFFFFF 100%)', difficulty: 'rarest'
+    },
+    {
+        emoji: '🇶🇦', name: '卡達',
+        hints: {
+            continent: { zh: '亞洲（2022世界盃主辦國）⚽' },
+            capital: { zh: '杜哈（未來之城）🏙️' },
+            food: { zh: 'Machboos飯、Harees麥粥 🍚' },
+            landmark: { zh: '伊斯蘭藝術博物館、珍珠島 🏛️' },
+            other: { zh: '人口290萬，人均GDP世界前三！💎' }
+        },
+        bgGradient: 'linear-gradient(135deg, #8D1B3D 0%, #FFFFFF 50%, #8D1B3D 100%)', difficulty: 'advanced'
     },
 ];
 
 // 遊戲狀態
 let gameState = {
-    playerName: '',
-    currentLanguage: 'zh',
-    difficulty: 'beginner', // 保留以支援舊模式
+    playerName: '',    difficulty: 'beginner', // 保留以支援舊模式
     gameMode: 'stage', // 'stage' 或 'classic'
     currentStage: 1,
     currentQuestion: 0,
@@ -1239,14 +1723,10 @@ const gameScreen = document.getElementById('game-screen');
 const endScreen = document.getElementById('end-screen');
 const leaderboardScreen = document.getElementById('leaderboard-screen');
 
-// 獲取當前語言翻譯
-function t(key) {
-    const keys = key.split('.');
-    let value = translations[gameState.currentLanguage];
-    for (const k of keys) {
-        value = value[k];
-    }
-    return value;
+
+// 根據當前語言獲取國家名稱
+function getCountryName(country) {
+    return country.name; // 只返回中文名稱
 }
 
 // 設置背景漸層
@@ -1294,58 +1774,34 @@ function createOptionButtons(options) {
     options.forEach(option => {
         const button = document.createElement('button');
         button.className = 'option-btn';
-        button.textContent = gameState.currentLanguage === 'zh' ? option.name : option.nameEn;
+        button.textContent = getCountryName(option);
         button.onclick = () => selectAnswer(option.name, button);
         optionsArea.appendChild(button);
     });
 }
 
 // 搞笑的答對訊息
-const correctMessages = {
-    zh: [
-        '🎉 天才！國旗大師就是你！',
-        '🔥 太強了！你是不是偷看地圖了？',
-        '⭐ 答對了！給你一朵小紅花！',
-        '🎊 哇塞！你該不會是地理老師吧？',
-        '💯 完美！連我媽都沒你厲害！',
-        '🏆 神人！這題難不倒你！',
-        '✨ 厲害炸了！考慮去參加益智節目嗎？',
-        '🎯 正確！你是國旗界的福爾摩斯！'
-    ],
-    en: [
-        '🎉 Genius! Flag master is YOU!',
-        '🔥 Too good! Did you cheat?',
-        '⭐ Correct! Here\'s a gold star!',
-        '🎊 Wow! Are you a geography teacher?',
-        '💯 Perfect! Better than my mom!',
-        '🏆 Legend! Nothing stops you!',
-        '✨ Amazing! Go on a quiz show!',
-        '🎯 Right! Sherlock of flags!'
-    ]
-};
+const correctMessages = [
+    '🎉 天才！國旗大師就是你！',
+    '🔥 太強了！你是不是偷看地圖了？',
+    '⭐ 答對了！給你一朵小紅花！',
+    '🎊 哇塞！你該不會是地理老師吧？',
+    '💯 完美！連我媽都沒你厲害！',
+    '🏆 神人！這題難不倒你！',
+    '✨ 厲害炸了！考慮去參加益智節目嗎？',
+    '🎯 正確！你是國旗界的福爾摩斯！'
+];
 
-const wrongMessages = {
-    zh: [
-        '❌ 哎呀！要不要回去重讀地理課本？',
-        '💔 錯了！但沒關係，我們都會犯錯...',
-        '😅 啊嘶～這題有點難啦！',
-        '🤦 不是這個啦！建議多旅行增廣見聞！',
-        '😢 GG！下次記得用提示！',
-        '🙈 答錯了！別灰心，至少你很勇敢！',
-        '💥 撞牆了！正確答案是：',
-        '😵 哎唷～差一點就對了（其實差很多）'
-    ],
-    en: [
-        '❌ Oops! Time to read geography books?',
-        '💔 Wrong! But it\'s okay, we all make mistakes...',
-        '😅 Ouch~ This one\'s tricky!',
-        '🤦 Not this one! Travel more!',
-        '😢 GG! Use hints next time!',
-        '🙈 Wrong! But at least you\'re brave!',
-        '💥 Crashed! Correct answer is:',
-        '😵 Ouch~ Almost! (not really)'
-    ]
-};
+const wrongMessages = [
+    '❌ 哎呀！要不要回去重讀地理課本？',
+    '💔 錯了！但沒關係，我們都會犯錯...',
+    '😅 啊嘶～這題有點難啦！',
+    '🤦 不是這個啦！建議多旅行增廣見聞！',
+    '😢 GG！下次記得用提示！',
+    '🙈 答錯了！別灰心，至少你很勇敢！',
+    '💥 撞牆了！正確答案是：',
+    '😵 哎唷～差一點就對了（其實差很多）'
+];
 
 // 選擇答案
 function selectAnswer(selectedName, buttonElement) {
@@ -1370,27 +1826,42 @@ function selectAnswer(selectedName, buttonElement) {
         gameState.totalScore += gameState.maxScoreForCurrentQuestion;
         gameState.correctAnswers++; // 增加答對計數
 
-        const countryName = gameState.currentLanguage === 'zh' ? correctAnswer : gameState.currentAnswer.nameEn;
+        // 更新成就統計
+        const stats = AchievementManager.getStats();
+        stats.currentCombo = (stats.currentCombo || 0) + 1;
+        stats.maxCombo = Math.max(stats.maxCombo || 0, stats.currentCombo);
+        stats.totalScore = (stats.totalScore || 0) + gameState.maxScoreForCurrentQuestion;
+
+        // 檢查是否為完美答題（沒用提示且答對）
+        if (gameState.hintsUsed === 0 && gameState.maxScoreForCurrentQuestion === 10) {
+            stats.perfectAnswers = (stats.perfectAnswers || 0) + 1;
+        }
+
+        AchievementManager.updateStats(stats);
+
+        const countryName = getCountryName(gameState.currentAnswer);
 
         // 隨機選擇一個搞笑答對訊息
-        const messages = correctMessages[gameState.currentLanguage];
+        const messages = correctMessages;
         const randomMsg = messages[Math.floor(Math.random() * messages.length)];
 
         feedback.textContent = `${randomMsg} 這是${countryName}的國旗！獲得 ${gameState.maxScoreForCurrentQuestion} 分！`;
-        if (gameState.currentLanguage === 'en') {
-            feedback.textContent = `${randomMsg} It\'s ${countryName}! You earned ${gameState.maxScoreForCurrentQuestion} points!`;
-        }
         feedback.className = 'feedback correct';
         feedback.classList.remove('hidden');
     } else {
         // 播放答錯音效
         SoundManager.playWrong();
 
+        // 重置連勝計數
+        const stats = AchievementManager.getStats();
+        stats.currentCombo = 0;
+        AchievementManager.saveStats(stats);
+
         buttonElement.classList.add('wrong');
 
         allButtons.forEach(btn => {
             const btnCountry = gameState.questions.find(q =>
-                (gameState.currentLanguage === 'zh' ? q.name : q.nameEn) === btn.textContent
+                getCountryName(q) === btn.textContent
             );
             if (btnCountry && btnCountry.name === correctAnswer) {
                 btn.classList.add('correct');
@@ -1398,10 +1869,10 @@ function selectAnswer(selectedName, buttonElement) {
         });
 
         gameState.lives--;
-        const countryName = gameState.currentLanguage === 'zh' ? correctAnswer : gameState.currentAnswer.nameEn;
+        const countryName = getCountryName(gameState.currentAnswer);
 
         // 隨機選擇一個搞笑答錯訊息
-        const messages = wrongMessages[gameState.currentLanguage];
+        const messages = wrongMessages;
         const randomMsg = messages[Math.floor(Math.random() * messages.length)];
 
         feedback.textContent = `${randomMsg} ${countryName}`;
@@ -1415,104 +1886,7 @@ function selectAnswer(selectedName, buttonElement) {
 }
 
 // 更新 UI 語言
-function updateLanguage() {
-    // 更新所有靜態文本
-    const elements = {
-        'page-title': t('title'),
-        'welcome-title': t('welcome'),
-        'welcome-subtitle': t('subtitle'),
-        'name-label': t('enterName'),
-        'difficulty-label': t('selectDifficulty'),
-        'question-text': t('question'),
-        'next-btn': t('nextBtn'),
-        'end-title': t('gameOver'),
-        'final-score-label': t('finalScore'),
-        'title-label': t('yourTitle'),
-        'play-again-btn': t('playAgain'),
-        'view-leaderboard-btn': t('viewLeaderboard'),
-        'share-btn': t('shareScore'),
-        'leaderboard-title': t('leaderboardTitle'),
-        'back-btn': t('backToGame')
-    };
 
-    for (const [id, text] of Object.entries(elements)) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-    }
-
-    // 更新提示按鈕文字
-    const hintBtnText = gameState.currentLanguage === 'zh' ? '提示' : 'Hint';
-    for (let i = 1; i <= 5; i++) {
-        const hintBtn = document.getElementById(`hint-btn-${i}`);
-        if (hintBtn) hintBtn.textContent = `${hintBtnText} ${i}`;
-    }
-
-    // 更新難度按鈕
-    const diffBtns = document.querySelectorAll('.difficulty-btn');
-    if (diffBtns.length >= 3) {
-        diffBtns[0].querySelector('.diff-name').textContent = t('beginner');
-        diffBtns[0].querySelector('.diff-desc').textContent = t('beginnerDesc');
-        diffBtns[1].querySelector('.diff-name').textContent = t('intermediate');
-        diffBtns[1].querySelector('.diff-desc').textContent = t('intermediateDesc');
-        diffBtns[2].querySelector('.diff-name').textContent = t('advanced');
-        diffBtns[2].querySelector('.diff-desc').textContent = t('advancedDesc');
-    }
-
-    // 更新排行榜表頭
-    const leaderboardHeaders = document.querySelectorAll('#leaderboard-screen th');
-    if (leaderboardHeaders.length >= 4) {
-        leaderboardHeaders[0].textContent = t('rank');
-        leaderboardHeaders[1].textContent = t('player');
-        leaderboardHeaders[2].textContent = t('difficulty');
-        leaderboardHeaders[3].textContent = t('score');
-    }
-
-    // 更新排行榜過濾按鈕
-    const filterLabels = {
-        'filter-all': t('filterAll'),
-        'filter-beginner': t('filterBeginner'),
-        'filter-intermediate': t('filterIntermediate'),
-        'filter-advanced': t('filterAdvanced')
-    };
-
-    for (const [id, text] of Object.entries(filterLabels)) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-    }
-
-    // 更新清除進度按鈕文字
-    const clearProgressText = document.getElementById('clear-progress-text');
-    if (clearProgressText) clearProgressText.textContent = t('clearProgress');
-}
-
-// 切換語言
-function toggleLanguage() {
-    gameState.currentLanguage = gameState.currentLanguage === 'zh' ? 'en' : 'zh';
-
-    // 保存語言設定
-    ProgressManager.saveSettings({ language: gameState.currentLanguage });
-
-    updateLanguage();
-
-    // 更新語言按鈕文本
-    document.getElementById('lang-toggle').textContent = gameState.currentLanguage === 'zh' ? 'EN' : '中文';
-
-    // 如果在關卡選擇畫面，重新渲染關卡
-    if (!stageSelectScreen.classList.contains('hidden')) {
-        renderStages();
-    }
-
-    // 如果在遊戲畫面，更新關卡資訊橫幅
-    if (!gameScreen.classList.contains('hidden') && gameState.currentStage) {
-        const stage = stageConfig.find(s => s.id === gameState.currentStage);
-        if (stage) {
-            const lang = gameState.currentLanguage;
-            document.getElementById('stage-number').textContent =
-                lang === 'zh' ? `第 ${gameState.currentStage} 關` : `Stage ${gameState.currentStage}`;
-            document.getElementById('stage-name').textContent = stage.name[lang];
-        }
-    }
-}
 
 // 載入關卡進度
 function loadStageProgress() {
@@ -1530,7 +1904,7 @@ function saveStageProgress() {
 function enterStageSelect() {
     const nameInput = document.getElementById('name-input');
     if (!nameInput.value.trim()) {
-        alert(gameState.currentLanguage === 'zh' ? '請輸入您的名稱！' : 'Please enter your name!');
+        alert('請輸入您的名稱！');
         return;
     }
 
@@ -1564,7 +1938,6 @@ function renderStages() {
             card.onclick = () => startStage(stage.id);
         }
 
-        const lang = gameState.currentLanguage;
 
         // 顯示邏輯：通過顯示✅，解鎖但未通過顯示🎮，未解鎖顯示🔒
         let statusIcon;
@@ -1578,19 +1951,19 @@ function renderStages() {
 
         card.innerHTML = `
             <div class="stage-header">
-                <div class="stage-name">${stage.name[lang]}</div>
+                <div class="stage-name">${stage.name.zh}</div>
                 <div class="stage-lock">${statusIcon}</div>
             </div>
-            <div class="stage-description">${stage.description[lang]}</div>
+            <div class="stage-description">${stage.description.zh}</div>
             <div class="stage-info">
                 <div class="stage-info-item">
-                    📝 <strong>${stage.totalQuestions}</strong> ${lang === 'zh' ? '題' : 'questions'}
+                    📝 <strong>${stage.totalQuestions}</strong> 題
                 </div>
                 <div class="stage-info-item">
-                    ✨ ${lang === 'zh' ? '需答對' : 'Need'} <strong>${stage.requiredCorrect}</strong> ${lang === 'zh' ? '題' : 'correct'}
+                    ✨ 需答對 <strong>${stage.requiredCorrect}</strong> 題
                 </div>
                 <div class="stage-info-item">
-                    ❤️ <strong>${stage.lives}</strong> ${lang === 'zh' ? '次機會' : 'lives'}
+                    ❤️ <strong>${stage.lives}</strong> 次機會
                 </div>
             </div>
         `;
@@ -1622,10 +1995,8 @@ function startStage(stageId) {
     gameState.questions = selectedQuestions;
 
     // 更新關卡資訊顯示
-    const lang = gameState.currentLanguage;
-    document.getElementById('stage-number').textContent =
-        lang === 'zh' ? `第 ${stageId} 關` : `Stage ${stageId}`;
-    document.getElementById('stage-name').textContent = stage.name[lang];
+    document.getElementById('stage-number').textContent = `第 ${stageId} 關`;
+    document.getElementById('stage-name').textContent = stage.name.zh;
 
     stageSelectScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
@@ -1638,7 +2009,7 @@ function startStage(stageId) {
 function startGame() {
     const nameInput = document.getElementById('name-input');
     if (!nameInput.value.trim()) {
-        alert(gameState.currentLanguage === 'zh' ? '請輸入您的名稱！' : 'Please enter your name!');
+        alert('請輸入您的名稱！');
         return;
     }
 
@@ -1710,6 +2081,11 @@ function showHint(hintNumber) {
 
     gameState.hintsUsed = hintNumber;
 
+    // 更新成就統計 - 提示使用次數
+    const stats = AchievementManager.getStats();
+    stats.totalHints = (stats.totalHints || 0) + 1;
+    AchievementManager.updateStats(stats);
+
     // 根據使用的提示數量計算分數
     // 索引: 0個提示=10分, 1個提示=9分, 2個提示=7分, 3個提示=5分, 4個提示=3分, 5個提示=2分
     const scoreReductions = [10, 9, 7, 5, 3, 2];
@@ -1719,18 +2095,18 @@ function showHint(hintNumber) {
     // 獲取當前提示編號對應的提示類型
     const hintType = gameState.hintOrder[hintNumber - 1];
     const hintData = gameState.currentAnswer.hints[hintType];
-    const hintText = gameState.currentLanguage === 'zh' ? hintData.zh : hintData.en;
+    const hintText = hintData.zh;
 
     // 提示類型的標籤
     const hintLabels = {
-        continent: { zh: '洲別', en: 'Continent' },
-        capital: { zh: '首都', en: 'Capital' },
-        food: { zh: '特色食物', en: 'Food' },
-        landmark: { zh: '景點', en: 'Landmark' },
-        other: { zh: '其他', en: 'Other' }
+        continent: '洲別',
+        capital: '首都',
+        food: '特色食物',
+        landmark: '地標',
+        other: '其他'
     };
 
-    const label = hintLabels[hintType][gameState.currentLanguage];
+    const label = hintLabels[hintType];
 
     // 顯示提示
     document.getElementById(`hint${hintNumber}`).textContent = `💡 ${label}：${hintText}`;
@@ -1770,44 +2146,67 @@ function endGame() {
             // 判斷是否為最後一關
             if (gameState.currentStage === stageConfig.length) {
                 // 最後一關通關！成為國旗王！
-                title = gameState.currentLanguage === 'zh' ?
-                    `👑🎉 恭喜！您已成為真正的國旗王！🎉👑` :
-                    `👑🎉 Congratulations! You are now the true Flag King! 🎉👑`;
-                description = gameState.currentLanguage === 'zh' ?
-                    `太厲害了！你完成了所有關卡的終極挑戰！\n\n答對了 ${gameState.correctAnswers} 題，總分 ${gameState.totalScore} 分！\n\n你對世界各國國旗瞭若指掌，堪稱國旗大師！` :
-                    `Amazing! You completed the ultimate challenge!\n\nGot ${gameState.correctAnswers} correct, total ${gameState.totalScore} points!\n\nYou are truly a flag master!`;
+                title = `👑🎉 恭喜！您已成為真正的國旗王！🎉👑`;
+                description = `太厲害了！你完成了所有關卡的終極挑戰！\n\n答對了 ${gameState.correctAnswers} 題，總分 ${gameState.totalScore} 分！\n\n你對世界各國國旗瞭若指掌，堪稱國旗大師！`;
             } else {
                 // 普通關卡通關
-                title = gameState.currentLanguage === 'zh' ?
-                    `🎉 恭喜通過 ${stage.name.zh}！` :
-                    `🎉 Congrats! Passed ${stage.name.en}!`;
-                description = gameState.currentLanguage === 'zh' ?
-                    `你答對了 ${gameState.correctAnswers} 題，獲得 ${gameState.totalScore} 分！` :
-                    `You got ${gameState.correctAnswers} correct, scored ${gameState.totalScore} points!`;
+                title = `🎉 恭喜通過 ${stage.name.zh}！`;
+                description = `你答對了 ${gameState.correctAnswers} 題，獲得 ${gameState.totalScore} 分！`;
 
                 // 記錄通過並解鎖下一關
                 if (!gameState.completedStages.includes(gameState.currentStage)) {
                     gameState.completedStages.push(gameState.currentStage);
+
+                    // 顯示地圖解鎖動畫
+                    showMapUnlockAnimation(gameState.currentStage);
+
+                    // 更新成就統計 - 完成關卡數
+                    const stats = AchievementManager.getStats();
+                    stats.completedStages = gameState.completedStages.length;
+
+                    // 檢查是否為完美通關（全對且無提示）
+                    if (gameState.correctAnswers === stage.totalQuestions &&
+                        gameState.totalScore === stage.totalQuestions * 10) {
+                        stats.perfectRounds = (stats.perfectRounds || 0) + 1;
+                    }
+
+                    AchievementManager.updateStats(stats);
                 }
                 if (gameState.currentStage >= gameState.unlockedStages) {
                     gameState.unlockedStages = gameState.currentStage + 1;
                 }
                 saveStageProgress();
 
-                description += gameState.currentLanguage === 'zh' ?
-                    '\n\n✨ 下一關已解鎖！' :
-                    '\n\n✨ Next stage unlocked!';
+                description += '\n\n✨ 下一關已解鎖！';
 
             }
         } else {
             // 失敗
-            title = gameState.currentLanguage === 'zh' ?
-                `😢 挑戰失敗` :
-                `😢 Challenge Failed`;
-            description = gameState.currentLanguage === 'zh' ?
-                `你答對了 ${gameState.correctAnswers} 題，需要答對 ${stage.requiredCorrect} 題才能通過。再接再厲！` :
-                `You got ${gameState.correctAnswers} correct, need ${stage.requiredCorrect} to pass. Try again!`;
+            title = `😢 挑戰失敗`;
+            description = `你答對了 ${gameState.correctAnswers} 題，需要答對 ${stage.requiredCorrect} 題才能通過。再接再厲！`;
         }
+    } else if (gameState.gameMode === 'daily') {
+        // 每日挑戰模式
+        SoundManager.playVictory();
+
+        // 儲存今日成績
+        DailyChallengeManager.saveTodayScore(gameState.totalScore);
+
+        const totalPossible = gameState.questions.length * 10;
+        const percentage = (gameState.totalScore / totalPossible) * 100;
+
+        
+
+        title = '📅 今日挑戰';
+
+        const dailyDesc = {
+            zh: `恭喜完成今日挑戰！\n\n答對 ${gameState.correctAnswers} 題，獲得 ${gameState.totalScore} 分！\n\n${percentage >= 80 ? '🌟 太厲害了！' : '💪 繼續加油！'}\n\n明天再來挑戰更高分數！`,
+            en: `Congratulations on completing today\'s challenge!\n\nGot ${gameState.correctAnswers} correct, scored ${gameState.totalScore} points!\n\n${percentage >= 80 ? '🌟 Amazing!' : '💪 Keep it up!'}\n\nCome back tomorrow for more!`,
+            ja: `本日のチャレンジ完了おめでとう！\n\n${gameState.correctAnswers}問正解、${gameState.totalScore}ポイント獲得！\n\n${percentage >= 80 ? '🌟 素晴らしい！' : '💪 頑張って！'}\n\nまた明日チャレンジしてね！`,
+            ko: `오늘의 챌린지 완료를 축하합니다!\n\n${gameState.correctAnswers}문제 정답、${gameState.totalScore}점 획득！\n\n${percentage >= 80 ? '🌟 훌륭해요！' : '💪 힘내세요！'}\n\n내일 또 도전하세요！`
+        };
+
+        description = '每天一組全球統一題目，挑戰世界排名！';
     } else {
         // 經典模式
         const totalPossible = gameState.questions.length * 10;
@@ -1867,8 +2266,7 @@ function saveScore() {
         score: gameState.totalScore,
         difficulty: gameState.difficulty,
         stage: gameState.currentStage,
-        date: new Date().toISOString(),
-        language: gameState.currentLanguage
+        date: new Date().toISOString()
     });
 
     leaderboard.sort((a, b) => b.score - a.score);
@@ -1960,9 +2358,7 @@ function displayLeaderboard() {
 
     filteredLeaderboard.slice(0, 10).forEach((entry, index) => {
         const row = document.createElement('tr');
-        const diffName = gameState.currentLanguage === 'zh' ?
-            (entry.difficulty === 'beginner' ? '初級' : entry.difficulty === 'intermediate' ? '中級' : '高級') :
-            (entry.difficulty === 'beginner' ? 'Beginner' : entry.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced');
+        const diffName = entry.difficulty === 'beginner' ? '初級' : entry.difficulty === 'intermediate' ? '中級' : '高級';
 
         row.innerHTML = `
             <td>${index + 1}</td>
@@ -1972,6 +2368,65 @@ function displayLeaderboard() {
         `;
         tbody.appendChild(row);
     });
+}
+
+// 開始每日挑戰
+function startDailyChallenge() {
+    const nameInput = document.getElementById('name-input');
+    if (!nameInput.value.trim()) {
+        alert('請輸入您的名稱！');
+        return;
+    }
+
+    // 檢查今日是否已完成
+    if (DailyChallengeManager.isTodayCompleted()) {
+        const msg = {
+            zh: '您今天已經完成每日挑戰了！明天再來吧！',
+            en: 'You\'ve already completed today\'s challenge! Come back tomorrow!',
+            ja: '本日のチャレンジは完了しました！また明日！',
+            ko: '오늘의 챌린지를 완료했습니다! 내일 다시 오세요!'
+        };
+        alert(msg.zh);
+        return;
+    }
+
+    gameState.playerName = nameInput.value.trim();
+    gameState.gameMode = 'daily';
+
+    // 保存玩家名稱
+    ProgressManager.savePlayerName(gameState.playerName);
+
+    // 初始化遊戲狀態
+    gameState.currentQuestion = 0;
+    gameState.totalScore = 0;
+    gameState.correctAnswers = 0;
+    gameState.lives = 3;
+    gameState.currentStage = null;
+
+    // 獲取今日挑戰題目
+    gameState.questions = DailyChallengeManager.generateTodayQuestions();
+
+    startScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+
+    // 更新關卡資訊橫幅為每日挑戰
+    updateDailyChallengeHeader();
+
+    loadQuestion();
+}
+
+// 更新每日挑戰標題
+function updateDailyChallengeHeader() {
+    const stageInfoBanner = document.querySelector('.stage-info-banner');
+    if (stageInfoBanner) {
+        const titles = {
+            zh: '📅 今日挑戰',
+            en: '📅 Daily Challenge',
+            ja: '📅 デイリーチャレンジ',
+            ko: '📅 데일리 챌린지'
+        };
+        stageInfoBanner.innerHTML = `<span>${stage.name.zh}</span>`;
+    }
 }
 
 // 返回開始畫面
@@ -1986,9 +2441,7 @@ function backToStart() {
 
 // 停止挑戰（回到關卡選擇畫面）
 function quitChallenge() {
-    const confirmMessage = gameState.currentLanguage === 'zh' ?
-        '確定要停止挑戰嗎？目前進度將不會被保存！' :
-        'Are you sure you want to quit? Current progress will not be saved!';
+    const confirmMessage = '確定要停止挑戰嗎？目前進度將不會被保存！';
 
     if (confirm(confirmMessage)) {
         gameScreen.classList.add('hidden');
@@ -2016,15 +2469,11 @@ function goToNextStage() {
 
 // 分享遊戲到 LINE
 function shareGame() {
-    const shareText = gameState.currentLanguage === 'zh' ?
-        `🎮 我正在玩國旗王挑戰！快來測試你對世界各國國旗的認識！你能通過所有關卡成為真正的國旗王嗎？🌍👑` :
-        `🎮 I'm playing Flag King Challenge! Test your knowledge of world flags! Can you pass all stages and become the true Flag King? 🌍👑`;
+    const shareText = `🎮 我正在玩國旗王挑戰！快來測試你對世界各國國旗的認識！你能通過所有關卡成為真正的國旗王嗎？🌍👑`;
 
     // 檢查是否有設定遊戲網址
     if (GAME_URL === 'YOUR_DEPLOYED_GAME_URL_HERE') {
-        alert(gameState.currentLanguage === 'zh' ?
-            '⚠️ 遊戲尚未部署，請先設定遊戲網址！' :
-            '⚠️ Game URL not configured yet!');
+        alert('⚠️ 遊戲尚未部署，請先設定遊戲網址！');
         return;
     }
 
@@ -2037,13 +2486,9 @@ function shareGame() {
 
 // 分享成績
 function shareScore() {
-    const diffName = gameState.currentLanguage === 'zh' ?
-        (gameState.difficulty === 'beginner' ? '初級' : gameState.difficulty === 'intermediate' ? '中級' : '高級') :
-        (gameState.difficulty === 'beginner' ? 'Beginner' : gameState.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced');
+    const diffName = gameState.difficulty === 'beginner' ? '初級' : gameState.difficulty === 'intermediate' ? '中級' : '高級';
 
-    const shareText = gameState.currentLanguage === 'zh' ?
-        `我在世界國旗挑戰（${diffName}）中獲得了 ${gameState.totalScore} 分！你能超越我嗎？🌍🏴` :
-        `I scored ${gameState.totalScore} points in World Flag Challenge (${diffName})! Can you beat me? 🌍🏴`;
+    const shareText = `我在世界國旗挑戰（${diffName}）中獲得了 ${gameState.totalScore} 分！你能超越我嗎？🌍🏴`;
 
     if (navigator.share) {
         navigator.share({
@@ -2052,7 +2497,7 @@ function shareScore() {
         });
     } else {
         navigator.clipboard.writeText(shareText);
-        alert(gameState.currentLanguage === 'zh' ? '已複製到剪貼簿！' : 'Copied to clipboard!');
+        alert('已複製到剪貼簿！');
     }
 }
 
@@ -2075,7 +2520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 載入設定（語言等）
     const settings = ProgressManager.loadSettings();
     if (settings.language) {
-        gameState.currentLanguage = settings.language;
+        // Language setting removed
     }
 
     // 載入玩家名稱
@@ -2089,9 +2534,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 更新音效按鈕狀態
     updateSoundButton();
-
-    updateLanguage();
     loadStageProgress(); // 載入關卡進度
+    updateDailyChallengeButton(); // 更新每日挑戰按鈕狀態
 
     // 顯示儲存空間使用情況（開發用）
     const storageInfo = ProgressManager.getStorageInfo();
@@ -2115,7 +2559,206 @@ function updateSoundButton() {
     if (btn) {
         btn.textContent = SoundManager.enabled ? '🔊' : '🔇';
         btn.title = SoundManager.enabled ?
-            (gameState.currentLanguage === 'zh' ? '點擊關閉音效' : 'Click to mute') :
-            (gameState.currentLanguage === 'zh' ? '點擊開啟音效' : 'Click to unmute');
+            ('點擊關閉音效') :
+            ('點擊開啟音效');
+    }
+}
+
+// 更新每日挑戰按鈕
+function updateDailyChallengeButton() {
+    const btn = document.getElementById('daily-challenge-btn');
+    const statusSpan = document.getElementById('daily-status');
+    const textSpan = document.getElementById('daily-challenge-text');
+
+    if (!btn || !statusSpan || !textSpan) return;
+
+    // 更新按鈕文字
+    textSpan.textContent = '📅 每日挑戰';
+
+    // 檢查今日是否已完成
+    if (DailyChallengeManager.isTodayCompleted()) {
+        const bestScore = DailyChallengeManager.getTodayBestScore();
+        const statusText = `✅ 已完成 (${bestScore}分)`;
+        statusSpan.textContent = statusText;
+    } else {
+        statusSpan.textContent = '';
+    }
+}
+
+// ============ 世界地圖功能 ============
+
+// 顯示世界地圖
+function showWorldMap() {
+    const mapScreen = document.getElementById('world-map-screen');
+    const startScreen = document.getElementById('start-screen');
+    const stageSelectScreen = document.getElementById('stage-select-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    // 隱藏所有其他畫面
+    startScreen.classList.add('hidden');
+    stageSelectScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+
+    // 顯示地圖
+    mapScreen.classList.remove('hidden');
+
+    // 更新地圖數據
+    updateWorldMap();
+}
+
+// 關閉世界地圖
+function closeWorldMap() {
+    const mapScreen = document.getElementById('world-map-screen');
+    const startScreen = document.getElementById('start-screen');
+
+    mapScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+}
+
+// 更新世界地圖數據
+function updateWorldMap() {
+    // 計算各區域解鎖的國家數量
+    const regionStats = calculateRegionStats();
+
+    // 更新每個區域的顯示
+    Object.keys(regionStats).forEach(region => {
+        const regionElement = document.getElementById(`region-${region}`);
+        if (regionElement) {
+            const progressElement = regionElement.querySelector('.region-progress');
+            const stat = regionStats[region];
+
+            progressElement.textContent = `${stat.unlocked}/${stat.total}`;
+
+            // 如果有解鎖任何國家，就標記為已解鎖
+            if (stat.unlocked > 0) {
+                regionElement.classList.add('unlocked');
+            } else {
+                regionElement.classList.remove('unlocked');
+            }
+        }
+    });
+
+    // 更新總體統計
+    updateMapStats();
+}
+
+// 計算各區域統計
+function calculateRegionStats() {
+    const completedStages = gameState.completedStages;
+    const unlockedCountries = new Set();
+
+    // 收集所有已完成關卡的國家
+    completedStages.forEach(stageId => {
+        const stage = stageConfig.find(s => s.id === stageId);
+        if (stage) {
+            stage.countryIndices.forEach(index => {
+                if (flagDatabase[index]) {
+                    unlockedCountries.add(index);
+                }
+            });
+        }
+    });
+
+    // 統計各區域
+    const stats = {
+        'asia': { unlocked: 0, total: 0 },
+        'europe': { unlocked: 0, total: 0 },
+        'africa': { unlocked: 0, total: 0 },
+        'north-america': { unlocked: 0, total: 0 },
+        'south-america': { unlocked: 0, total: 0 },
+        'oceania': { unlocked: 0, total: 0 }
+    };
+
+    // 計算每個區域的國家數量
+    flagDatabase.forEach((country, index) => {
+        const continent = country.hints.continent.zh;
+        let regionKey = null;
+
+        if (continent.includes('亞洲')) regionKey = 'asia';
+        else if (continent.includes('歐洲')) regionKey = 'europe';
+        else if (continent.includes('非洲')) regionKey = 'africa';
+        else if (continent.includes('北美洲')) regionKey = 'north-america';
+        else if (continent.includes('南美洲')) regionKey = 'south-america';
+        else if (continent.includes('大洋洲')) regionKey = 'oceania';
+
+        if (regionKey) {
+            stats[regionKey].total++;
+            if (unlockedCountries.has(index)) {
+                stats[regionKey].unlocked++;
+            }
+        }
+    });
+
+    return stats;
+}
+
+// 更新地圖統計數據
+function updateMapStats() {
+    const completedStages = gameState.completedStages.length;
+    const totalStages = stageConfig.length;
+
+    // 計算已解鎖的國家數量
+    const unlockedCountries = new Set();
+    gameState.completedStages.forEach(stageId => {
+        const stage = stageConfig.find(s => s.id === stageId);
+        if (stage) {
+            stage.countryIndices.forEach(index => {
+                unlockedCountries.add(index);
+            });
+        }
+    });
+
+    const totalCountries = flagDatabase.length;
+    const completion = Math.round((unlockedCountries.size / totalCountries) * 100);
+
+    // 更新顯示
+    document.getElementById('stages-completed').textContent = `${completedStages} / ${totalStages}`;
+    document.getElementById('countries-unlocked').textContent = `${unlockedCountries.size} / ${totalCountries}`;
+    document.getElementById('total-completion').textContent = `${completion}%`;
+}
+
+// 當通過關卡時顯示地圖解鎖動畫
+function showMapUnlockAnimation(stageId) {
+    const stage = stageConfig.find(s => s.id === stageId);
+    if (!stage) return;
+
+    // 收集本關卡解鎖的新區域
+    const newRegions = new Set();
+    stage.countryIndices.forEach(index => {
+        const country = flagDatabase[index];
+        if (country) {
+            const continent = country.hints.continent.zh;
+            if (continent.includes('亞洲')) newRegions.add('asia');
+            else if (continent.includes('歐洲')) newRegions.add('europe');
+            else if (continent.includes('非洲')) newRegions.add('africa');
+            else if (continent.includes('北美洲')) newRegions.add('north-america');
+            else if (continent.includes('南美洲')) newRegions.add('south-america');
+            else if (continent.includes('大洋洲')) newRegions.add('oceania');
+        }
+    });
+
+    // 如果有新解鎖的區域，顯示通知
+    if (newRegions.size > 0) {
+        const regionNames = {
+            'asia': '亞洲',
+            'europe': '歐洲',
+            'africa': '非洲',
+            'north-america': '北美洲',
+            'south-america': '南美洲',
+            'oceania': '大洋洲'
+        };
+
+        const regionsText = Array.from(newRegions).map(r => regionNames[r]).join('、');
+
+        // 使用成就通知系統顯示解鎖訊息
+        setTimeout(() => {
+            AchievementManager.showNotification(
+                '🗺️',
+                '世界地圖解鎖！',
+                `恭喜解鎖 ${regionsText} 區域！`
+            );
+        }, 1500);
     }
 }

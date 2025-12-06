@@ -15,11 +15,11 @@
     <div class="brand-logo">VIBECODING GAMES BY SABRINA</div>
 
     <div class="container">
-        <!-- 語言切換按鈕 -->
-        <button id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()">EN</button>
-
         <!-- 音效開關按鈕 -->
         <button id="sound-toggle" class="sound-toggle" onclick="toggleSound()" title="點擊關閉音效">🔊</button>
+
+        <!-- 世界地圖按鈕 -->
+        <button id="map-toggle" class="map-toggle" onclick="showWorldMap()" title="查看已解鎖的世界地圖">🗺️</button>
 
         <h1 id="page-title">🌍 國旗王挑戰 🌍</h1>
 
@@ -36,6 +36,10 @@
                 </div>
 
                 <button id="enter-stage-btn" class="btn btn-primary" onclick="enterStageSelect()">🎮 進入闖關模式</button>
+                <button id="daily-challenge-btn" class="btn btn-daily" onclick="startDailyChallenge()">
+                    <span id="daily-challenge-text">📅 每日挑戰</span>
+                    <span id="daily-status" class="daily-status"></span>
+                </button>
                 <button id="clear-progress-btn" class="btn btn-secondary" onclick="ProgressManager.clearAllProgress()" style="font-size: 0.85em; padding: 8px 16px; margin-top: 10px;">🗑️ <span id="clear-progress-text">清除所有進度</span></button>
             </div>
         </div>
@@ -177,6 +181,60 @@
                 </table>
             </div>
             <button id="back-btn" class="btn btn-primary" onclick="backToStart()">返回遊戲</button>
+        </div>
+
+        <!-- 世界地圖畫面 -->
+        <div id="world-map-screen" class="hidden">
+            <h2>🗺️ 世界地圖解鎖進度</h2>
+            <p class="map-subtitle">通過關卡，逐步解鎖全世界！</p>
+
+            <div class="world-map-container">
+                <div class="world-map">
+                    <!-- 地圖區域將由 JavaScript 動態生成 -->
+                    <div class="map-region" id="region-asia" data-region="亞洲">
+                        <div class="region-name">亞洲</div>
+                        <div class="region-progress">0/20</div>
+                    </div>
+                    <div class="map-region" id="region-europe" data-region="歐洲">
+                        <div class="region-name">歐洲</div>
+                        <div class="region-progress">0/20</div>
+                    </div>
+                    <div class="map-region" id="region-africa" data-region="非洲">
+                        <div class="region-name">非洲</div>
+                        <div class="region-progress">0/20</div>
+                    </div>
+                    <div class="map-region" id="region-north-america" data-region="北美洲">
+                        <div class="region-name">北美洲</div>
+                        <div class="region-progress">0/20</div>
+                    </div>
+                    <div class="map-region" id="region-south-america" data-region="南美洲">
+                        <div class="region-name">南美洲</div>
+                        <div class="region-progress">0/20</div>
+                    </div>
+                    <div class="map-region" id="region-oceania" data-region="大洋洲">
+                        <div class="region-name">大洋洲</div>
+                        <div class="region-progress">0/20</div>
+                    </div>
+                </div>
+
+                <div class="unlock-stats">
+                    <h3>解鎖統計</h3>
+                    <div class="stat-item">
+                        <span>通過關卡：</span>
+                        <span id="stages-completed">0 / 20</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>已解鎖國家：</span>
+                        <span id="countries-unlocked">0 / 87</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>總完成度：</span>
+                        <span id="total-completion">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="back-from-map-btn" class="btn btn-primary" onclick="closeWorldMap()">返回</button>
         </div>
     </div>
 

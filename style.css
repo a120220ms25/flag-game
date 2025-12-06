@@ -92,40 +92,11 @@ h2 {
     letter-spacing: 0.5px;
 }
 
-/* 語言切換按鈕 */
-.lang-toggle {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    padding: 8px 16px;
-    background: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 500;
-    font-family: var(--font-style);
-    font-size: 14px;
-    transition: all 0.2s ease;
-    z-index: 10;
-    box-shadow: 0 3px 0 var(--shadow-color);
-}
-
-.lang-toggle:hover {
-    background: #C88488;
-    transform: translateY(-1px);
-}
-
-.lang-toggle:active {
-    transform: translateY(3px);
-    box-shadow: 0 0 0 var(--shadow-color);
-}
-
 /* 音效開關按鈕 */
 .sound-toggle {
     position: absolute;
     top: 16px;
-    right: 80px;
+    right: 16px;
     padding: 8px 12px;
     background: var(--accent-color);
     color: white;
@@ -151,12 +122,21 @@ h2 {
 /* 開始畫面 */
 .welcome-text {
     text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .welcome-text p {
     font-size: 1em;
     color: #666;
     margin-bottom: 20px;
+}
+
+.welcome-text .btn {
+    margin: 10px auto;
+    display: block;
+    max-width: 400px;
+    width: 100%;
 }
 
 /* 名稱輸入 */
@@ -246,9 +226,9 @@ h2 {
     opacity: 0.9;
 }
 
-/* 按鈕樣式 */
+/* 按鈕樣式 - 統一設計 */
 .btn {
-    padding: 12px 28px;
+    padding: 14px 32px;
     border: none;
     border-radius: var(--border-radius);
     font-size: 16px;
@@ -256,7 +236,7 @@ h2 {
     transition: all 0.2s ease;
     font-weight: 500;
     font-family: var(--font-style);
-    margin: 6px;
+    text-align: center;
 }
 
 .btn-primary {
@@ -305,11 +285,36 @@ h2 {
     box-shadow: none;
 }
 
+.btn-daily {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 3px 0 #5a4a8a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-daily:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #65408b 100%);
+    transform: translateY(-1px);
+}
+
+.btn-daily:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 #5a4a8a;
+}
+
+.daily-status {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
 .btn-hint {
     background: var(--accent-color);
     color: white;
-    font-size: 14px;
-    padding: 10px 20px;
+    font-size: 15px;
+    padding: 12px 24px;
     font-family: var(--font-style);
     font-weight: 500;
     box-shadow: 0 3px 0 var(--shadow-color);
@@ -444,16 +449,39 @@ h2 {
 .hints-area {
     margin: 15px 0;
     min-height: 40px;
+    max-height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 自訂滾動條樣式 */
+.hints-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.hints-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.hints-area::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 3px;
+}
+
+.hints-area::-webkit-scrollbar-thumb:hover {
+    background: var(--shadow-color);
 }
 
 .hint {
     background: #fff3cd;
     border-left: 4px solid #ffc107;
-    padding: 10px 15px;
-    margin: 8px 0;
+    padding: 8px 12px;
+    margin: 6px 0;
     border-radius: 5px;
     animation: slideIn 0.3s ease-out;
-    font-size: 0.95em;
+    font-size: 0.9em;
+    line-height: 1.4;
 }
 
 @keyframes slideIn {
@@ -606,20 +634,24 @@ h2 {
 /* 遊戲控制按鈕區 */
 .game-control-buttons {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
-    margin: 15px 0;
+    margin: 20px auto;
     flex-wrap: wrap;
+    max-width: 500px;
+}
+
+.game-control-buttons .btn {
+    flex: 1;
+    min-width: 180px;
 }
 
 #next-btn {
-    padding: 12px 35px;
-    font-size: 1.1em;
+    /* 繼承 .btn 的統一樣式 */
 }
 
 #quit-btn {
-    padding: 10px 24px;
-    font-size: 1em;
+    /* 繼承 .btn 的統一樣式 */
 }
 
 /* 結束畫面 */
@@ -666,10 +698,18 @@ h2 {
 
 .end-buttons {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
     margin-top: 20px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.end-buttons .btn {
+    flex: 1;
+    min-width: 180px;
 }
 
 /* 排行榜 */
@@ -848,6 +888,7 @@ h2 {
     .hints-area {
         margin: 6px 0;
         min-height: auto;
+        max-height: 120px;
     }
 
     .hint {
@@ -977,7 +1018,7 @@ h2 {
     }
 
     /* 按鈕統一樣式 */
-    .btn-primary, .btn-secondary {
+    .btn-primary, .btn-secondary, .btn-daily {
         width: 100%;
     }
 
@@ -1006,19 +1047,10 @@ h2 {
         margin-bottom: 10px;
     }
 
-    /* 語言切換按鈕 */
-    .lang-toggle {
-        top: 6px;
-        right: 6px;
-        padding: 4px 8px;
-        font-size: 0.75em;
-        box-shadow: 0 2px 0 var(--shadow-color);
-    }
-
     /* 音效開關按鈕 */
     .sound-toggle {
         top: 6px;
-        right: 55px;
+        right: 6px;
         padding: 4px 8px;
         font-size: 16px;
         box-shadow: 0 2px 0 var(--shadow-color);
@@ -1328,5 +1360,203 @@ h2 {
 
     .achievement-desc {
         font-size: 12px;
+    }
+}
+
+/* 世界地圖按鈕 */
+.map-toggle {
+    position: absolute;
+    top: 16px;
+    right: 70px;
+    padding: 8px 12px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 3px 0 var(--shadow-color);
+}
+
+.map-toggle:hover {
+    background: #C88488;
+    transform: translateY(-1px) scale(1.1);
+}
+
+.map-toggle:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--shadow-color);
+}
+
+/* 世界地圖畫面 */
+.map-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1em;
+}
+
+.world-map-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.world-map {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.map-region {
+    background: #f0f0f0;
+    border: 3px solid #ddd;
+    border-radius: var(--border-radius);
+    padding: 30px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.map-region::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent-color) 0%, #F5B7B9 100%);
+    transition: width 0.8s ease;
+    z-index: 0;
+    opacity: 0.2;
+}
+
+.map-region.unlocked::before {
+    width: 100%;
+}
+
+.map-region.unlocked {
+    border-color: var(--accent-color);
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(214, 147, 150, 0.3);
+    animation: regionUnlock 0.6s ease-out;
+}
+
+@keyframes regionUnlock {
+    0% {
+        transform: scale(0.8) translateY(0);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.1) translateY(-5px);
+    }
+    100% {
+        transform: scale(1) translateY(-2px);
+        opacity: 1;
+    }
+}
+
+.region-name {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.map-region.unlocked .region-name {
+    color: var(--accent-color);
+}
+
+.region-progress {
+    font-size: 1em;
+    color: #666;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.map-region.unlocked .region-progress {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* 解鎖統計 */
+.unlock-stats {
+    background: white;
+    border: 2px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.unlock-stats h3 {
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1em;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item span:first-child {
+    color: #666;
+    font-weight: 500;
+}
+
+.stat-item span:last-child {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* 手機版地圖樣式 */
+@media (max-width: 768px) {
+    .map-toggle {
+        top: 6px;
+        right: 60px;
+        padding: 4px 8px;
+        font-size: 18px;
+    }
+
+    .world-map {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .map-region {
+        padding: 20px 15px;
+    }
+
+    .region-name {
+        font-size: 1.1em;
+    }
+
+    .region-progress {
+        font-size: 0.9em;
+    }
+
+    .unlock-stats {
+        padding: 15px;
+    }
+
+    .stat-item {
+        font-size: 0.9em;
     }
 }
