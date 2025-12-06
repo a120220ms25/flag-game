@@ -19,12 +19,14 @@ body {
     font-family: var(--font-style);
     background: var(--bg-canvas);
     min-height: 100vh;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
     transition: background 0.3s ease;
     position: relative;
+    overflow: hidden; /* 完全防止滾動 */
 }
 
 body > .container {
@@ -40,7 +42,8 @@ body > .container {
     max-width: 700px;
     width: 100%;
     max-height: 95vh;
-    overflow-y: auto;
+    height: auto;
+    overflow: hidden; /* 完全防止滾動 */
     animation: fadeIn 0.4s ease-out;
 }
 
@@ -301,6 +304,33 @@ h2 {
     transform: none;
     opacity: 0.5;
     box-shadow: none;
+}
+
+/* 關卡資訊橫幅 */
+.stage-info-banner {
+    text-align: center;
+    padding: 12px 20px;
+    background: var(--accent-color);
+    color: white;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    font-family: var(--font-style);
+    font-weight: 600;
+    font-size: 1.1em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stage-info-banner .separator {
+    margin: 0 10px;
+    opacity: 0.7;
+}
+
+#stage-number {
+    color: white;
+}
+
+#stage-name {
+    color: white;
 }
 
 /* 遊戲狀態列 */
@@ -652,7 +682,7 @@ h2 {
 
 .leaderboard-content {
     margin: 20px 0;
-    overflow-x: auto;
+    overflow: hidden; /* 防止滾動 */
 }
 
 #leaderboard-table {
@@ -697,73 +727,350 @@ h2 {
     font-size: 1.1em;
 }
 
-/* 響應式設計 */
+/* 響應式設計 - 手機版優化（完全無滾動） */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 0;
+        align-items: flex-start;
+        height: 100vh;
+        overflow: hidden; /* 防止任何滾動 */
     }
 
     .container {
-        padding: 20px;
-        max-height: 98vh;
+        padding: 10px;
+        max-height: 100vh;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        overflow: hidden; /* 完全防止滾動 */
+        display: flex;
+        flex-direction: column;
     }
 
     h1 {
-        font-size: 1.6em;
+        font-size: 1.2em;
+        margin-bottom: 8px;
     }
 
     h2 {
-        font-size: 1.3em;
+        font-size: 1.1em;
+        margin-bottom: 8px;
     }
 
+    /* 國旗顯示區優化 */
     #flag-emoji {
-        font-size: 90px;
+        font-size: 55px;
+        margin-bottom: 5px;
     }
 
+    .flag-display {
+        margin: 8px 0 5px 0;
+    }
+
+    .question-text {
+        font-size: 0.85em;
+        margin: 0;
+    }
+
+    /* 關卡資訊橫幅 */
+    .stage-info-banner {
+        padding: 5px 8px;
+        font-size: 0.75em;
+        margin-bottom: 6px;
+    }
+
+    .stage-info-banner .separator {
+        margin: 0 4px;
+    }
+
+    /* 遊戲狀態列 */
+    .game-status {
+        padding: 5px;
+        margin-bottom: 6px;
+        gap: 4px;
+        font-size: 0.7em;
+        flex-wrap: wrap;
+    }
+
+    .status-item {
+        gap: 2px;
+        min-width: auto;
+    }
+
+    .status-item .label {
+        font-size: 0.9em;
+    }
+
+    /* 選項按鈕 */
     .options-area {
         grid-template-columns: 1fr;
+        gap: 6px;
+        margin: 6px 0;
     }
 
+    .option-btn {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    /* 提示區域 */
+    .hints-area {
+        margin: 6px 0;
+        min-height: auto;
+    }
+
+    .hint {
+        padding: 6px 10px;
+        margin: 4px 0;
+        font-size: 0.75em;
+        line-height: 1.3;
+    }
+
+    /* 提示按鈕 */
+    .hint-buttons {
+        gap: 4px;
+        margin: 6px 0;
+        flex-wrap: wrap;
+        flex-direction: row;
+    }
+
+    .btn-hint {
+        font-size: 11px;
+        padding: 6px 8px;
+        flex: 1 1 calc(33.33% - 4px);
+        min-width: calc(33.33% - 4px);
+        box-shadow: 0 2px 0 var(--shadow-color);
+    }
+
+    /* 遊戲控制按鈕 */
+    .game-control-buttons {
+        gap: 6px;
+        margin: 6px 0;
+        flex-direction: row;
+    }
+
+    #next-btn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+        flex: 1;
+    }
+
+    #quit-btn {
+        padding: 8px 16px;
+        font-size: 0.85em;
+        flex: 1;
+    }
+
+    /* 回饋訊息 */
+    .feedback {
+        padding: 8px;
+        margin: 6px 0;
+        font-size: 0.85em;
+        line-height: 1.3;
+    }
+
+    /* 難度選擇 */
     .difficulty-options {
         flex-direction: column;
+        gap: 6px;
     }
 
     .difficulty-btn {
         min-width: 100%;
+        padding: 10px 8px;
     }
 
-    .hint-buttons {
-        flex-direction: column;
+    /* 關卡選擇 */
+    .stages-container {
+        gap: 8px;
+        margin: 10px 0;
     }
 
-    .btn {
-        width: 100%;
+    .stage-card {
+        padding: 12px;
     }
 
-    .game-status {
-        flex-direction: column;
-        text-align: center;
+    .stage-name {
+        font-size: 1em;
+    }
+
+    .stage-description {
+        font-size: 0.8em;
+        margin-bottom: 8px;
+    }
+
+    .stage-info {
+        gap: 10px;
+        font-size: 0.8em;
+    }
+
+    /* 結束畫面 */
+    .final-result {
+        margin: 10px 0;
+    }
+
+    .final-score {
+        margin-bottom: 15px;
     }
 
     #final-score-value {
-        font-size: 2.5em;
+        font-size: 1.8em;
+    }
+
+    .title-section {
+        padding: 15px;
+        margin: 8px 0;
+    }
+
+    #title-badge {
+        font-size: 1.8em;
+        margin: 8px 0;
+    }
+
+    #title-description {
+        font-size: 0.85em;
+        line-height: 1.4;
     }
 
     .end-buttons {
         flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
     }
 
-    .lang-toggle {
-        top: 10px;
-        right: 10px;
-        padding: 6px 12px;
+    .btn {
+        width: 100%;
+        margin: 0;
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    /* 按鈕統一樣式 */
+    .btn-primary, .btn-secondary {
+        width: 100%;
+    }
+
+    /* 名稱輸入 */
+    .name-input-section {
+        margin: 10px 0;
+    }
+
+    .name-input-section label {
         font-size: 0.9em;
+        margin-bottom: 6px;
+    }
+
+    #name-input {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    /* 歡迎文字 */
+    .welcome-text h2 {
+        font-size: 1.1em;
+    }
+
+    .welcome-text p {
+        font-size: 0.85em;
+        margin-bottom: 10px;
+    }
+
+    /* 語言切換按鈕 */
+    .lang-toggle {
+        top: 6px;
+        right: 6px;
+        padding: 4px 8px;
+        font-size: 0.75em;
+        box-shadow: 0 2px 0 var(--shadow-color);
+    }
+
+    /* 品牌標誌 */
+    .brand-logo {
+        top: 6px;
+        left: 6px;
+        font-size: 8px;
+    }
+
+    /* 排行榜 */
+    .leaderboard-filter {
+        gap: 4px;
+        margin: 10px 0;
+    }
+
+    .filter-btn {
+        padding: 6px 10px;
+        font-size: 0.8em;
+    }
+
+    #leaderboard-table {
+        font-size: 0.8em;
+    }
+
+    #leaderboard-table th,
+    #leaderboard-table td {
+        padding: 6px 4px;
+    }
+
+    /* 關卡選擇標題 */
+    #stage-select-subtitle {
+        font-size: 0.85em;
+        margin-bottom: 10px;
+    }
+
+    /* 開始畫面按鈕 */
+    #enter-stage-btn {
+        margin-top: 10px;
+    }
+}
+
+/* 超小螢幕優化（iPhone SE 等） */
+@media (max-width: 375px) {
+    .container {
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 1.1em;
+        margin-bottom: 6px;
+    }
+
+    #flag-emoji {
+        font-size: 50px;
+        margin-bottom: 4px;
+    }
+
+    .btn-hint {
+        font-size: 10px;
+        padding: 5px 6px;
+    }
+
+    .stage-info-banner {
+        font-size: 0.7em;
+        padding: 4px 6px;
+    }
+
+    .game-status {
+        font-size: 0.65em;
+        padding: 4px;
     }
 
     .brand-logo {
-        top: 10px;
-        left: 10px;
-        font-size: 10px;
+        font-size: 7px;
+    }
+
+    .option-btn {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .hint {
+        padding: 5px 8px;
+        font-size: 0.7em;
+    }
+
+    .feedback {
+        padding: 6px;
+        font-size: 0.8em;
     }
 }
 
@@ -881,21 +1188,12 @@ h2 {
     }
 }
 
-/* 隱藏滾動條但保持可滾動 */
+/* 完全隱藏滾動條 */
 .container::-webkit-scrollbar {
-    width: 6px;
+    display: none;
 }
 
-.container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.container::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 10px;
-}
-
-.container::-webkit-scrollbar-thumb:hover {
-    background: var(--shadow-color);
+.container {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }

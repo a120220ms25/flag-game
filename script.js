@@ -154,6 +154,7 @@ const translations = {
 };
 
 // 關卡設計（難度遞增：從熟悉到冷門）
+// 每個關卡使用不重複的國家，確保沒有題目重複
 const stageConfig = [
     {
         id: 1,
@@ -161,7 +162,7 @@ const stageConfig = [
         description: { zh: '從熟悉的國家開始你的旅程！', en: 'Start with familiar countries!' },
         totalQuestions: 5,
         requiredCorrect: 3,
-        difficulties: ['beginner'], // 只有初級（最簡單）
+        countryIndices: [0, 1, 2, 3, 4], // 台灣、中國、日本、南韓、泰國
         lives: 3
     },
     {
@@ -170,8 +171,7 @@ const stageConfig = [
         description: { zh: '探索更多國家的國旗！', en: 'Explore more country flags!' },
         totalQuestions: 8,
         requiredCorrect: 5,
-        difficulties: ['beginner', 'intermediate'], // 初級+中級混合
-        difficultyRatio: { beginner: 0.6, intermediate: 0.4 }, // 60%初級 + 40%中級
+        countryIndices: [5, 6, 7, 8, 9, 10, 11, 12], // 土耳其、希臘、多明尼加、越南、哥倫比亞、美國、新加坡、法國
         lives: 3
     },
     {
@@ -180,17 +180,16 @@ const stageConfig = [
         description: { zh: '挑戰來自世界各地的國旗！', en: 'Challenge flags from around the world!' },
         totalQuestions: 10,
         requiredCorrect: 7,
-        difficulties: ['intermediate'], // 只有中級
+        countryIndices: [13, 14, 15, 16, 17, 18, 19, 20, 21, 22], // 英國、義大利、德國、西班牙、巴西、阿根廷、墨西哥、加拿大、澳洲、印度
         lives: 3
     },
     {
         id: 4,
         name: { zh: '🎓 地理學大師', en: '🎓 Geography Master' },
-        description: { zh: '證明你的地理知識！冷門國家來了！', en: 'Prove your geography knowledge! Obscure countries!' },
+        description: { zh: '最少人去旅行的國家！你去過幾個？', en: 'Least visited countries! How many have you been to?' },
         totalQuestions: 12,
         requiredCorrect: 9,
-        difficulties: ['intermediate', 'advanced'], // 中級+高級
-        difficultyRatio: { intermediate: 0.5, advanced: 0.5 }, // 50%中級 + 50%高級
+        countryIndices: [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34], // 南非、埃及、瑞典、瑞士、荷蘭、葡萄牙、挪威、丹麥、芬蘭、冰島、黎巴嫩、紐西蘭
         lives: 2
     },
     {
@@ -199,7 +198,7 @@ const stageConfig = [
         description: { zh: '世界人口最少的國家！挑戰真正的國旗王！', en: 'World\'s least populated countries! True Flag King challenge!' },
         totalQuestions: 15,
         requiredCorrect: 12,
-        difficulties: ['rarest'], // 極稀有難度（世界人口最少的國家）
+        countryIndices: [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49], // 所有極稀有國家
         lives: 2
     }
 ];
@@ -317,8 +316,30 @@ const flagDatabase = [
         },
         bgGradient: 'linear-gradient(135deg, #FCD116 0%, #003893 50%, #CE1126 100%)', difficulty: 'beginner'
     },
+    {
+        emoji: '🇺🇸', name: '美國', nameEn: 'United States',
+        hints: {
+            continent: { zh: '北美洲（世界警察）🦅', en: 'North America (world police) 🦅' },
+            capital: { zh: '華盛頓特區（大家都以為是紐約）🗽', en: 'Washington D.C. (everyone thinks it\'s NYC) 🗽' },
+            food: { zh: '漢堡、熱狗、炸雞，份量大到嚇死人！🍔', en: 'Burgers, hot dogs, fried chicken - portions huge! 🍔' },
+            landmark: { zh: '自由女神、好萊塢、迪士尼樂園！🎬', en: 'Statue of Liberty, Hollywood, Disneyland! 🎬' },
+            other: { zh: '50個州，每州都有自己的規定超複雜！🇺🇸', en: '50 states, each with own laws - so complicated! 🇺🇸' }
+        },
+        bgGradient: 'linear-gradient(135deg, #B22234 0%, #FFFFFF 50%, #3C3B6E 100%)', difficulty: 'beginner'
+    },
+    {
+        emoji: '🇸🇬', name: '新加坡', nameEn: 'Singapore',
+        hints: {
+            continent: { zh: '亞洲（花園城市但罰款超多）🌺', en: 'Asia (garden city but fines everywhere) 🌺' },
+            capital: { zh: '新加坡（國家就是城市）🏙️', en: 'Singapore (country = city) 🏙️' },
+            food: { zh: '海南雞飯、辣椒螃蟹、肉骨茶！🦀', en: 'Hainanese chicken rice, chili crab, bak kut teh! 🦀' },
+            landmark: { zh: '魚尾獅、濱海灣金沙酒店（天台泳池）🏊', en: 'Merlion, Marina Bay Sands (rooftop pool) 🏊' },
+            other: { zh: '吃口香糖會被罰款，超級乾淨！🚫', en: 'Chewing gum = fine, super clean! 🚫' }
+        },
+        bgGradient: 'linear-gradient(135deg, #ED2939 0%, #FFFFFF 100%)', difficulty: 'beginner'
+    },
 
-    // ============ 中級難度 (10個) - 中等知名度國家 ============
+    // ============ 中級難度 (13個) - 中等知名度國家 ============
     {
         emoji: '🇫🇷', name: '法國', nameEn: 'France',
         hints: {
@@ -428,6 +449,39 @@ const flagDatabase = [
             other: { zh: '袋鼠、無尾熊、毒蜘蛛、毒蛇通通有！☠️', en: 'Kangaroos, koalas, deadly spiders, snakes - all here! ☠️' }
         },
         bgGradient: 'linear-gradient(135deg, #00008B 0%, #FFFFFF 50%, #FF0000 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇮🇳', name: '印度', nameEn: 'India',
+        hints: {
+            continent: { zh: '亞洲（咖哩王國）🍛', en: 'Asia (curry kingdom) 🍛' },
+            capital: { zh: '新德里（塞車+牛群=日常）🐄', en: 'New Delhi (traffic + cows = daily life) 🐄' },
+            food: { zh: '咖哩、烤餅Naan、瑪莎拉奶茶超香！🫓', en: 'Curry, naan bread, masala chai so fragrant! 🫓' },
+            landmark: { zh: '泰姬瑪哈陵（愛情的象徵）💕', en: 'Taj Mahal (symbol of love) 💕' },
+            other: { zh: '14億人口，寶萊塢電影必跳舞！💃', en: '1.4 billion people, Bollywood = must dance! 💃' }
+        },
+        bgGradient: 'linear-gradient(135deg, #FF9933 0%, #FFFFFF 50%, #138808 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇿🇦', name: '南非', nameEn: 'South Africa',
+        hints: {
+            continent: { zh: '非洲（彩虹之國）🌈', en: 'Africa (Rainbow Nation) 🌈' },
+            capital: { zh: '有3個首都（行政、立法、司法分開）🏛️', en: '3 capitals (executive, legislative, judicial) 🏛️' },
+            food: { zh: 'Biltong肉乾、Braai烤肉派對！🥩', en: 'Biltong jerky, braai BBQ parties! 🥩' },
+            landmark: { zh: '桌山、好望角、克魯格國家公園 🦁', en: 'Table Mountain, Cape of Good Hope, Kruger Park 🦁' },
+            other: { zh: '11種官方語言，曼德拉的故鄉！✊', en: '11 official languages, Mandela\'s homeland! ✊' }
+        },
+        bgGradient: 'linear-gradient(135deg, #007A4D 0%, #FFB81C 50%, #DE3831 100%)', difficulty: 'intermediate'
+    },
+    {
+        emoji: '🇪🇬', name: '埃及', nameEn: 'Egypt',
+        hints: {
+            continent: { zh: '非洲（金字塔之國）🔺', en: 'Africa (land of pyramids) 🔺' },
+            capital: { zh: '開羅（人比金字塔還多）🏙️', en: 'Cairo (more people than pyramids) 🏙️' },
+            food: { zh: 'Koshari燉飯、烤肉串、甜點超甜！🍮', en: 'Koshari rice, kebabs, desserts super sweet! 🍮' },
+            landmark: { zh: '金字塔、人面獅身像、尼羅河 🛶', en: 'Pyramids, Sphinx, Nile River 🛶' },
+            other: { zh: '5000年歷史，法老王的詛咒超有名！👑', en: '5000 year history, pharaoh\'s curse famous! 👑' }
+        },
+        bgGradient: 'linear-gradient(135deg, #CE1126 0%, #FFFFFF 50%, #000000 100%)', difficulty: 'intermediate'
     },
 
     // ============ 高級難度 (10個) - 冷門國家 ============
@@ -986,6 +1040,17 @@ function toggleLanguage() {
     if (!stageSelectScreen.classList.contains('hidden')) {
         renderStages();
     }
+
+    // 如果在遊戲畫面，更新關卡資訊橫幅
+    if (!gameScreen.classList.contains('hidden') && gameState.currentStage) {
+        const stage = stageConfig.find(s => s.id === gameState.currentStage);
+        if (stage) {
+            const lang = gameState.currentLanguage;
+            document.getElementById('stage-number').textContent =
+                lang === 'zh' ? `第 ${gameState.currentStage} 關` : `Stage ${gameState.currentStage}`;
+            document.getElementById('stage-name').textContent = stage.name[lang];
+        }
+    }
 }
 
 // 載入關卡進度
@@ -1088,25 +1153,22 @@ function startStage(stageId) {
     gameState.correctAnswers = 0;
     gameState.lives = stage.lives;
 
-    // 根據關卡設定選擇題目（支援難度比例）
-    let selectedQuestions = [];
+    // 使用預先定義的國家索引，確保每個關卡的國家不重複
+    const selectedQuestions = stage.countryIndices.map(index => flagDatabase[index]);
 
-    if (stage.difficultyRatio) {
-        // 按比例選擇不同難度的題目
-        for (const [difficulty, ratio] of Object.entries(stage.difficultyRatio)) {
-            const count = Math.round(stage.totalQuestions * ratio);
-            const flags = flagDatabase.filter(f => f.difficulty === difficulty);
-            const shuffled = flags.sort(() => Math.random() - 0.5);
-            selectedQuestions.push(...shuffled.slice(0, count));
-        }
-    } else {
-        // 沒有比例設定，均勻選擇
-        const availableFlags = flagDatabase.filter(f => stage.difficulties.includes(f.difficulty));
-        selectedQuestions = availableFlags.sort(() => Math.random() - 0.5).slice(0, stage.totalQuestions);
+    // 使用 Fisher-Yates 洗牌打亂題目順序
+    for (let i = selectedQuestions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [selectedQuestions[i], selectedQuestions[j]] = [selectedQuestions[j], selectedQuestions[i]];
     }
 
-    // 打亂順序
-    gameState.questions = selectedQuestions.sort(() => Math.random() - 0.5);
+    gameState.questions = selectedQuestions;
+
+    // 更新關卡資訊顯示
+    const lang = gameState.currentLanguage;
+    document.getElementById('stage-number').textContent =
+        lang === 'zh' ? `第 ${stageId} 關` : `Stage ${stageId}`;
+    document.getElementById('stage-name').textContent = stage.name[lang];
 
     stageSelectScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
