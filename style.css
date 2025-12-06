@@ -121,6 +121,33 @@ h2 {
     box-shadow: 0 0 0 var(--shadow-color);
 }
 
+/* 音效開關按鈕 */
+.sound-toggle {
+    position: absolute;
+    top: 16px;
+    right: 80px;
+    padding: 8px 12px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 3px 0 var(--shadow-color);
+}
+
+.sound-toggle:hover {
+    background: #C88488;
+    transform: translateY(-1px) scale(1.1);
+}
+
+.sound-toggle:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--shadow-color);
+}
+
 /* 開始畫面 */
 .welcome-text {
     text-align: center;
@@ -988,6 +1015,15 @@ h2 {
         box-shadow: 0 2px 0 var(--shadow-color);
     }
 
+    /* 音效開關按鈕 */
+    .sound-toggle {
+        top: 6px;
+        right: 55px;
+        padding: 4px 8px;
+        font-size: 16px;
+        box-shadow: 0 2px 0 var(--shadow-color);
+    }
+
     /* 品牌標誌 */
     .brand-logo {
         top: 6px;
@@ -1200,4 +1236,97 @@ h2 {
 .container {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+}
+
+/* 成就通知 */
+.achievement-notification {
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #333;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 9999;
+    min-width: 300px;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border: 3px solid #FFF;
+}
+
+.achievement-notification.show {
+    top: 80px;
+    animation: achievementPop 0.6s ease-out;
+}
+
+@keyframes achievementPop {
+    0% {
+        transform: translateX(-50%) scale(0.5) rotate(-10deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.1) rotate(5deg);
+    }
+    100% {
+        transform: translateX(-50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.achievement-icon {
+    font-size: 40px;
+    animation: achievementIconSpin 1s ease-in-out infinite alternate;
+}
+
+@keyframes achievementIconSpin {
+    0% {
+        transform: rotate(-10deg) scale(1);
+    }
+    100% {
+        transform: rotate(10deg) scale(1.1);
+    }
+}
+
+.achievement-content {
+    flex: 1;
+}
+
+.achievement-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.achievement-desc {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .achievement-notification {
+        min-width: 280px;
+        padding: 15px 20px;
+    }
+
+    .achievement-notification.show {
+        top: 60px;
+    }
+
+    .achievement-icon {
+        font-size: 32px;
+    }
+
+    .achievement-title {
+        font-size: 16px;
+    }
+
+    .achievement-desc {
+        font-size: 12px;
+    }
 }

@@ -1,6 +1,305 @@
 // 遊戲網址設定（部署後請更新此連結）
 const GAME_URL = 'YOUR_DEPLOYED_GAME_URL_HERE'; // 部署後請將此連結替換為實際網址
 
+// ============ 音效系統 ============
+const SoundManager = {
+    audioContext: null,
+    enabled: true,
+
+    // 初始化音效系統
+    init() {
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // 從 localStorage 載入音效設定
+            const savedSettings = ProgressManager.loadSettings();
+            this.enabled = savedSettings.soundEnabled !== false;
+        } catch (e) {
+            console.warn('音效系統初始化失敗:', e);
+            this.enabled = false;
+        }
+    },
+
+    // 播放答對音效（愉快的上升音調）
+    playCorrect() {
+        if (!this.enabled || !this.audioContext) return;
+
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        // 愉快的音階：C5 -> E5 -> G5
+        oscillator.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.4);
+    },
+
+    // 播放答錯音效（下降音調）
+    playWrong() {
+        if (!this.enabled || !this.audioContext) return;
+
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        // 失望的下降音階
+        oscillator.frequency.setValueAtTime(400, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3);
+
+        oscillator.type = 'sawtooth';
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+    },
+
+    // 播放按鈕點擊音效
+    playClick() {
+        if (!this.enabled || !this.audioContext) return;
+
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.05);
+    },
+
+    // 播放通關音效（歡樂的旋律）
+    playVictory() {
+        if (!this.enabled || !this.audioContext) return;
+
+        const ctx = this.audioContext;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+
+        notes.forEach((freq, i) => {
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+            oscillator.type = 'sine';
+
+            const startTime = ctx.currentTime + (i * 0.15);
+            gainNode.gain.setValueAtTime(0.3, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.3);
+        });
+    },
+
+    // 播放提示音效
+    playHint() {
+        if (!this.enabled || !this.audioContext) return;
+
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+        oscillator.frequency.setValueAtTime(700, ctx.currentTime + 0.05);
+        oscillator.type = 'triangle';
+        gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.15);
+    },
+
+    // 切換音效開關
+    toggle() {
+        this.enabled = !this.enabled;
+        const settings = ProgressManager.loadSettings();
+        settings.soundEnabled = this.enabled;
+        ProgressManager.saveSettings(settings);
+        return this.enabled;
+    }
+};
+
+// ============ 成就徽章系統 ============
+const AchievementManager = {
+    achievements: [
+        {
+            id: 'first_win',
+            name: { zh: '🎯 首次勝利', en: '🎯 First Victory' },
+            description: { zh: '完成第一個關卡', en: 'Complete first stage' },
+            condition: (stats) => stats.completedStages >= 1
+        },
+        {
+            id: 'stage_master',
+            name: { zh: '🌟 關卡大師', en: '🌟 Stage Master' },
+            description: { zh: '完成所有關卡', en: 'Complete all stages' },
+            condition: (stats) => stats.completedStages >= 5
+        },
+        {
+            id: 'perfect_score',
+            name: { zh: '💯 完美主義者', en: '💯 Perfectionist' },
+            description: { zh: '在一關中不使用任何提示且全部答對', en: 'Perfect score without hints' },
+            condition: (stats) => stats.perfectRounds >= 1
+        },
+        {
+            id: 'speed_runner',
+            name: { zh: '⚡ 閃電快手', en: '⚡ Speed Runner' },
+            description: { zh: '在5秒內答對一題', en: 'Answer within 5 seconds' },
+            condition: (stats) => stats.fastAnswers >= 1
+        },
+        {
+            id: 'hint_master',
+            name: { zh: '🔍 提示達人', en: '🔍 Hint Master' },
+            description: { zh: '累計使用50次提示', en: 'Use 50 hints total' },
+            condition: (stats) => stats.totalHints >= 50
+        },
+        {
+            id: 'combo_king',
+            name: { zh: '🔥 連勝之王', en: '🔥 Combo King' },
+            description: { zh: '連續答對10題', en: 'Answer 10 correct in a row' },
+            condition: (stats) => stats.maxCombo >= 10
+        },
+        {
+            id: 'world_traveler',
+            name: { zh: '🌍 環遊世界', en: '🌍 World Traveler' },
+            description: { zh: '答對來自5個不同洲的國旗', en: 'Correct answers from 5 continents' },
+            condition: (stats) => stats.continentsUnlocked >= 5
+        },
+        {
+            id: 'score_hunter',
+            name: { zh: '💰 分數獵人', en: '💰 Score Hunter' },
+            description: { zh: '累計得分超過500分', en: 'Total score over 500' },
+            condition: (stats) => stats.totalScore >= 500
+        }
+    ],
+
+    // 獲取成就統計
+    getStats() {
+        const saved = localStorage.getItem('flagGameAchievementStats');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return {
+            completedStages: 0,
+            perfectRounds: 0,
+            fastAnswers: 0,
+            totalHints: 0,
+            maxCombo: 0,
+            currentCombo: 0,
+            continentsUnlocked: 0,
+            totalScore: 0,
+            unlockedAchievements: []
+        };
+    },
+
+    // 保存成就統計
+    saveStats(stats) {
+        localStorage.setItem('flagGameAchievementStats', JSON.stringify(stats));
+    },
+
+    // 更新統計
+    updateStats(updates) {
+        const stats = this.getStats();
+        Object.assign(stats, updates);
+        this.saveStats(stats);
+        this.checkAchievements(stats);
+        return stats;
+    },
+
+    // 檢查並解鎖成就
+    checkAchievements(stats) {
+        const newlyUnlocked = [];
+
+        this.achievements.forEach(achievement => {
+            if (!stats.unlockedAchievements.includes(achievement.id)) {
+                if (achievement.condition(stats)) {
+                    stats.unlockedAchievements.push(achievement.id);
+                    newlyUnlocked.push(achievement);
+                }
+            }
+        });
+
+        if (newlyUnlocked.length > 0) {
+            this.saveStats(stats);
+            newlyUnlocked.forEach(achievement => {
+                this.showAchievementNotification(achievement);
+            });
+        }
+
+        return newlyUnlocked;
+    },
+
+    // 顯示成就通知
+    showAchievementNotification(achievement) {
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification';
+        notification.innerHTML = `
+            <div class="achievement-icon">🏆</div>
+            <div class="achievement-content">
+                <div class="achievement-title">${achievement.name[gameState.currentLanguage]}</div>
+                <div class="achievement-desc">${achievement.description[gameState.currentLanguage]}</div>
+            </div>
+        `;
+        document.body.appendChild(notification);
+
+        // 播放音效
+        SoundManager.playVictory();
+
+        // 動畫
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 500);
+        }, 4000);
+    },
+
+    // 獲取已解鎖的成就
+    getUnlockedAchievements() {
+        const stats = this.getStats();
+        return this.achievements.filter(a =>
+            stats.unlockedAchievements.includes(a.id)
+        );
+    },
+
+    // 獲取進度
+    getProgress() {
+        const stats = this.getStats();
+        const total = this.achievements.length;
+        const unlocked = stats.unlockedAchievements.length;
+        return {
+            total,
+            unlocked,
+            percentage: Math.round((unlocked / total) * 100)
+        };
+    }
+};
+
 // ============ localStorage 進度管理系統 ============
 const ProgressManager = {
     KEYS: {
@@ -1064,6 +1363,9 @@ function selectAnswer(selectedName, buttonElement) {
     const feedback = document.getElementById('feedback');
 
     if (isCorrect) {
+        // 播放答對音效
+        SoundManager.playCorrect();
+
         buttonElement.classList.add('correct');
         gameState.totalScore += gameState.maxScoreForCurrentQuestion;
         gameState.correctAnswers++; // 增加答對計數
@@ -1081,6 +1383,9 @@ function selectAnswer(selectedName, buttonElement) {
         feedback.className = 'feedback correct';
         feedback.classList.remove('hidden');
     } else {
+        // 播放答錯音效
+        SoundManager.playWrong();
+
         buttonElement.classList.add('wrong');
 
         allButtons.forEach(btn => {
@@ -1400,6 +1705,9 @@ function showHint(hintNumber) {
         return;
     }
 
+    // 播放提示音效
+    SoundManager.playHint();
+
     gameState.hintsUsed = hintNumber;
 
     // 根據使用的提示數量計算分數
@@ -1456,6 +1764,9 @@ function endGame() {
         const passed = gameState.correctAnswers >= stage.requiredCorrect;
 
         if (passed) {
+            // 播放通關音效
+            SoundManager.playVictory();
+
             // 判斷是否為最後一關
             if (gameState.currentStage === stageConfig.length) {
                 // 最後一關通關！成為國旗王！
@@ -1758,6 +2069,9 @@ function selectDifficulty(difficulty, element) {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    // 初始化音效系統
+    SoundManager.init();
+
     // 載入設定（語言等）
     const settings = ProgressManager.loadSettings();
     if (settings.language) {
@@ -1773,10 +2087,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 更新音效按鈕狀態
+    updateSoundButton();
+
     updateLanguage();
     loadStageProgress(); // 載入關卡進度
 
     // 顯示儲存空間使用情況（開發用）
     const storageInfo = ProgressManager.getStorageInfo();
     console.log('🎮 遊戲進度儲存:', storageInfo);
+    console.log('🔊 音效系統:', SoundManager.enabled ? '已啟用' : '已關閉');
 });
+
+// 切換音效
+function toggleSound() {
+    const enabled = SoundManager.toggle();
+    updateSoundButton();
+    // 播放測試音效
+    if (enabled) {
+        SoundManager.playClick();
+    }
+}
+
+// 更新音效按鈕
+function updateSoundButton() {
+    const btn = document.getElementById('sound-toggle');
+    if (btn) {
+        btn.textContent = SoundManager.enabled ? '🔊' : '🔇';
+        btn.title = SoundManager.enabled ?
+            (gameState.currentLanguage === 'zh' ? '點擊關閉音效' : 'Click to mute') :
+            (gameState.currentLanguage === 'zh' ? '點擊開啟音效' : 'Click to unmute');
+    }
+}
