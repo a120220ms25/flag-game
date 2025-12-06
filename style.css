@@ -366,6 +366,7 @@ h2 {
 .flag-display {
     text-align: center;
     margin: 25px 0 15px 0;
+    contain: layout style; /* 效能優化：隔離重繪 */
 }
 
 #flag-emoji {
@@ -374,6 +375,8 @@ h2 {
     animation: flagEntrance 0.8s ease-out;
     cursor: pointer;
     transition: transform 0.3s ease;
+    will-change: transform; /* 效能優化：預告瀏覽器即將變換 */
+    contain: layout style paint; /* 效能優化：隔離渲染 */
 }
 
 #flag-emoji:hover {
@@ -382,17 +385,18 @@ h2 {
 
 @keyframes flagEntrance {
     0% {
-        transform: scale(0) rotate(-180deg);
+        transform: scale(0) rotate(-180deg) translateZ(0);
         opacity: 0;
     }
     50% {
-        transform: scale(1.2) rotate(10deg);
+        transform: scale(1.2) rotate(10deg) translateZ(0);
     }
     100% {
-        transform: scale(1) rotate(0deg);
+        transform: scale(1) rotate(0deg) translateZ(0);
         opacity: 1;
     }
 }
+/* 效能優化：translateZ(0) 啟用硬體加速 */
 
 @keyframes bounce {
     0%, 100% {

@@ -1,6 +1,152 @@
 // 遊戲網址設定（部署後請更新此連結）
 const GAME_URL = 'YOUR_DEPLOYED_GAME_URL_HERE'; // 部署後請將此連結替換為實際網址
 
+// ============ localStorage 進度管理系統 ============
+const ProgressManager = {
+    KEYS: {
+        STAGE_PROGRESS: 'flagGameStageProgress',
+        PLAYER_NAME: 'flagGamePlayerName',
+        CURRENT_GAME: 'flagGameCurrentGame',
+        LEADERBOARD: 'flagGameLeaderboard',
+        SETTINGS: 'flagGameSettings'
+    },
+
+    // 保存關卡進度
+    saveStageProgress(unlockedStages, completedStages) {
+        const progress = {
+            unlockedStages: unlockedStages || 1,
+            completedStages: completedStages || [],
+            lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem(this.KEYS.STAGE_PROGRESS, JSON.stringify(progress));
+    },
+
+    // 載入關卡進度
+    loadStageProgress() {
+        try {
+            const saved = localStorage.getItem(this.KEYS.STAGE_PROGRESS);
+            if (saved) {
+                const progress = JSON.parse(saved);
+                return {
+                    unlockedStages: progress.unlockedStages || 1,
+                    completedStages: progress.completedStages || []
+                };
+            }
+        } catch (e) {
+            console.error('載入關卡進度失敗:', e);
+        }
+        return { unlockedStages: 1, completedStages: [] };
+    },
+
+    // 保存玩家名稱
+    savePlayerName(name) {
+        if (name && name.trim()) {
+            localStorage.setItem(this.KEYS.PLAYER_NAME, name.trim());
+        }
+    },
+
+    // 載入玩家名稱
+    loadPlayerName() {
+        return localStorage.getItem(this.KEYS.PLAYER_NAME) || '';
+    },
+
+    // 保存當前遊戲狀態（可以續玩）
+    saveCurrentGame(gameState) {
+        try {
+            const saveData = {
+                playerName: gameState.playerName,
+                currentStage: gameState.currentStage,
+                currentQuestion: gameState.currentQuestion,
+                totalScore: gameState.totalScore,
+                correctAnswers: gameState.correctAnswers,
+                lives: gameState.lives,
+                questions: gameState.questions.map(q => ({ name: q.name, nameEn: q.nameEn })),
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(this.KEYS.CURRENT_GAME, JSON.stringify(saveData));
+        } catch (e) {
+            console.error('保存遊戲進度失敗:', e);
+        }
+    },
+
+    // 載入當前遊戲狀態
+    loadCurrentGame() {
+        try {
+            const saved = localStorage.getItem(this.KEYS.CURRENT_GAME);
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('載入遊戲進度失敗:', e);
+        }
+        return null;
+    },
+
+    // 清除當前遊戲（遊戲結束時）
+    clearCurrentGame() {
+        localStorage.removeItem(this.KEYS.CURRENT_GAME);
+    },
+
+    // 保存設定（語言等）
+    saveSettings(settings) {
+        localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
+    },
+
+    // 載入設定
+    loadSettings() {
+        try {
+            const saved = localStorage.getItem(this.KEYS.SETTINGS);
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('載入設定失敗:', e);
+        }
+        return { language: 'zh' };
+    },
+
+    // 保存排行榜
+    saveLeaderboard(leaderboard) {
+        localStorage.setItem(this.KEYS.LEADERBOARD, JSON.stringify(leaderboard.slice(0, 50)));
+    },
+
+    // 載入排行榜
+    loadLeaderboard() {
+        try {
+            const saved = localStorage.getItem(this.KEYS.LEADERBOARD);
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            console.error('載入排行榜失敗:', e);
+            return [];
+        }
+    },
+
+    // 清除所有進度（重置遊戲）
+    clearAllProgress() {
+        if (confirm('確定要清除所有遊戲進度嗎？此操作無法復原！\nClear all game progress? This cannot be undone!')) {
+            Object.values(this.KEYS).forEach(key => {
+                localStorage.removeItem(key);
+            });
+            location.reload();
+        }
+    },
+
+    // 獲取儲存空間使用情況
+    getStorageInfo() {
+        let total = 0;
+        Object.values(this.KEYS).forEach(key => {
+            const item = localStorage.getItem(key);
+            if (item) {
+                total += item.length;
+            }
+        });
+        return {
+            used: (total / 1024).toFixed(2) + ' KB',
+            items: Object.values(this.KEYS).filter(key => localStorage.getItem(key)).length
+        };
+    }
+};
+
 // 語言翻譯
 const translations = {
     zh: {
@@ -55,6 +201,7 @@ const translations = {
         filterBeginner: '初級',
         filterIntermediate: '中級',
         filterAdvanced: '高級',
+        clearProgress: '清除所有進度',
         titles: {
             cosmic: '🌌 宇宙旗幟先知',
             cosmicDesc: '您可能曾經是聯合國秘書長！對世界各國國旗瞭若指掌！',
@@ -129,6 +276,7 @@ const translations = {
         filterBeginner: 'Beginner',
         filterIntermediate: 'Intermediate',
         filterAdvanced: 'Advanced',
+        clearProgress: 'Clear All Progress',
         titles: {
             cosmic: '🌌 Cosmic Flag Prophet',
             cosmicDesc: 'You might have been a UN Secretary-General! Master of all world flags!',
@@ -1026,11 +1174,19 @@ function updateLanguage() {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
     }
+
+    // 更新清除進度按鈕文字
+    const clearProgressText = document.getElementById('clear-progress-text');
+    if (clearProgressText) clearProgressText.textContent = t('clearProgress');
 }
 
 // 切換語言
 function toggleLanguage() {
     gameState.currentLanguage = gameState.currentLanguage === 'zh' ? 'en' : 'zh';
+
+    // 保存語言設定
+    ProgressManager.saveSettings({ language: gameState.currentLanguage });
+
     updateLanguage();
 
     // 更新語言按鈕文本
@@ -1055,21 +1211,14 @@ function toggleLanguage() {
 
 // 載入關卡進度
 function loadStageProgress() {
-    const savedProgress = localStorage.getItem('flagGameStageProgress');
-    if (savedProgress) {
-        const progress = JSON.parse(savedProgress);
-        gameState.unlockedStages = progress.unlockedStages || 1;
-        gameState.completedStages = progress.completedStages || []; // 已通過的關卡列表
-    }
+    const progress = ProgressManager.loadStageProgress();
+    gameState.unlockedStages = progress.unlockedStages;
+    gameState.completedStages = progress.completedStages;
 }
 
 // 儲存關卡進度
 function saveStageProgress() {
-    const progress = {
-        unlockedStages: gameState.unlockedStages,
-        completedStages: gameState.completedStages || []
-    };
-    localStorage.setItem('flagGameStageProgress', JSON.stringify(progress));
+    ProgressManager.saveStageProgress(gameState.unlockedStages, gameState.completedStages);
 }
 
 // 進入關卡選擇畫面
@@ -1082,6 +1231,9 @@ function enterStageSelect() {
 
     gameState.playerName = nameInput.value.trim();
     gameState.gameMode = 'stage';
+
+    // 保存玩家名稱
+    ProgressManager.savePlayerName(gameState.playerName);
 
     // 載入關卡進度
     loadStageProgress();
@@ -1286,6 +1438,9 @@ function nextQuestion() {
 
 // 結束遊戲
 function endGame() {
+    // 清除當前遊戲進度（遊戲已結束）
+    ProgressManager.clearCurrentGame();
+
     gameScreen.classList.add('hidden');
     endScreen.classList.remove('hidden');
 
@@ -1394,19 +1549,20 @@ function endGame() {
 
 // 保存分數到排行榜
 function saveScore() {
-    const leaderboard = JSON.parse(localStorage.getItem('flagGameLeaderboard') || '[]');
+    const leaderboard = ProgressManager.loadLeaderboard();
 
     leaderboard.push({
         name: gameState.playerName,
         score: gameState.totalScore,
         difficulty: gameState.difficulty,
+        stage: gameState.currentStage,
         date: new Date().toISOString(),
         language: gameState.currentLanguage
     });
 
     leaderboard.sort((a, b) => b.score - a.score);
 
-    localStorage.setItem('flagGameLeaderboard', JSON.stringify(leaderboard.slice(0, 50)));
+    ProgressManager.saveLeaderboard(leaderboard);
 }
 
 // 當前排行榜過濾難度
@@ -1473,7 +1629,7 @@ function showLeaderboard() {
 
 // 顯示排行榜數據
 function displayLeaderboard() {
-    const leaderboard = JSON.parse(localStorage.getItem('flagGameLeaderboard') || '[]');
+    const leaderboard = ProgressManager.loadLeaderboard();
     const tbody = document.querySelector('#leaderboard-table tbody');
     tbody.innerHTML = '';
 
@@ -1602,6 +1758,25 @@ function selectDifficulty(difficulty, element) {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    // 載入設定（語言等）
+    const settings = ProgressManager.loadSettings();
+    if (settings.language) {
+        gameState.currentLanguage = settings.language;
+    }
+
+    // 載入玩家名稱
+    const savedName = ProgressManager.loadPlayerName();
+    if (savedName) {
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) {
+            nameInput.value = savedName;
+        }
+    }
+
     updateLanguage();
     loadStageProgress(); // 載入關卡進度
+
+    // 顯示儲存空間使用情況（開發用）
+    const storageInfo = ProgressManager.getStorageInfo();
+    console.log('🎮 遊戲進度儲存:', storageInfo);
 });
