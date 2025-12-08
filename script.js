@@ -2037,8 +2037,8 @@ function loadQuestion() {
     gameState.maxScoreForCurrentQuestion = 10;
     gameState.currentAnswer = gameState.questions[gameState.currentQuestion];
 
-    // 生成隨機提示順序（洲別、首都、食物、景點、其他）
-    gameState.hintOrder = ['continent', 'capital', 'food', 'landmark', 'other'].sort(() => Math.random() - 0.5);
+    // 生成隨機提示順序（洲別、首都、食物）
+    gameState.hintOrder = ['continent', 'capital', 'food'].sort(() => Math.random() - 0.5);
 
     setBackground(gameState.currentAnswer);
 
@@ -2069,10 +2069,10 @@ function updateLivesDisplay() {
     document.getElementById('lives').textContent = '❤️'.repeat(gameState.lives);
 }
 
-// 顯示提示（5 個提示隨機顯示）
+// 顯示提示（3 個提示隨機顯示）
 function showHint(hintNumber) {
-    if (hintNumber > gameState.hintsUsed + 1) {
-        // 必須按順序使用提示
+    if (hintNumber > gameState.hintsUsed + 1 || hintNumber > 3) {
+        // 必須按順序使用提示，且最多3個
         return;
     }
 
@@ -2087,8 +2087,8 @@ function showHint(hintNumber) {
     AchievementManager.updateStats(stats);
 
     // 根據使用的提示數量計算分數
-    // 索引: 0個提示=10分, 1個提示=9分, 2個提示=7分, 3個提示=5分, 4個提示=3分, 5個提示=2分
-    const scoreReductions = [10, 9, 7, 5, 3, 2];
+    // 索引: 0個提示=10分, 1個提示=8分, 2個提示=5分, 3個提示=3分
+    const scoreReductions = [10, 8, 5, 3];
     gameState.maxScoreForCurrentQuestion = scoreReductions[hintNumber];
     document.getElementById('max-score').textContent = gameState.maxScoreForCurrentQuestion;
 
@@ -2622,21 +2622,45 @@ function updateWorldMap() {
     // 計算各區域解鎖的國家數量
     const regionStats = calculateRegionStats();
 
-    // 更新每個區域的顯示
+    // 更新SVG path元素的unlocked狀態
     Object.keys(regionStats).forEach(region => {
-        const regionElement = document.getElementById(`region-${region}`);
-        if (regionElement) {
-            const progressElement = regionElement.querySelector('.region-progress');
-            const stat = regionStats[region];
+        const pathElement = document.getElementById(`region-${region}`);
+        const stat = regionStats[region];
 
-            progressElement.textContent = `${stat.unlocked}/${stat.total}`;
-
+        if (pathElement) {
             // 如果有解鎖任何國家，就標記為已解鎖
             if (stat.unlocked > 0) {
-                regionElement.classList.add('unlocked');
+                pathElement.classList.add('unlocked');
             } else {
-                regionElement.classList.remove('unlocked');
+                pathElement.classList.remove('unlocked');
             }
+        }
+    });
+
+    // 更新SVG進度文字
+    const regionNameMap = {
+        'north-america': '北美洲',
+        'south-america': '南美洲',
+        'europe': '歐洲',
+        'africa': '非洲',
+        'asia': '亞洲',
+        'oceania': '大洋洲'
+    };
+
+    Object.keys(regionStats).forEach(region => {
+        const regionName = regionNameMap[region];
+        const stat = regionStats[region];
+
+        // 找到對應的progress text元素並更新
+        const svg = document.querySelector('.world-map-svg');
+        if (svg) {
+            const texts = svg.querySelectorAll('.region-progress-text');
+            texts.forEach(text => {
+                const prevText = text.previousElementSibling;
+                if (prevText && prevText.textContent === regionName) {
+                    text.textContent = `${stat.unlocked}/${stat.total}`;
+                }
+            });
         }
     });
 
