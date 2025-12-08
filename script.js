@@ -1811,9 +1811,12 @@ function selectAnswer(selectedName, buttonElement) {
     const allButtons = document.querySelectorAll('.option-btn');
     allButtons.forEach(btn => btn.disabled = true);
 
-    // 禁用所有提示按鈕
-    for (let i = 1; i <= 5; i++) {
-        document.getElementById(`hint-btn-${i}`).disabled = true;
+    // 禁用所有提示按鈕（3個）
+    for (let i = 1; i <= 3; i++) {
+        const hintBtn = document.getElementById(`hint-btn-${i}`);
+        if (hintBtn) {
+            hintBtn.disabled = true;
+        }
     }
 
     const feedback = document.getElementById('feedback');
@@ -2053,11 +2056,17 @@ function loadQuestion() {
     gameState.currentOptions = generateOptions(gameState.currentAnswer);
     createOptionButtons(gameState.currentOptions);
 
-    // 清空並隱藏所有提示
-    for (let i = 1; i <= 5; i++) {
-        document.getElementById(`hint${i}`).classList.add('hidden');
-        document.getElementById(`hint${i}`).textContent = '';
-        document.getElementById(`hint-btn-${i}`).disabled = false;
+    // 清空並隱藏所有提示（3個）
+    for (let i = 1; i <= 3; i++) {
+        const hintElement = document.getElementById(`hint${i}`);
+        const hintBtn = document.getElementById(`hint-btn-${i}`);
+        if (hintElement) {
+            hintElement.classList.add('hidden');
+            hintElement.textContent = '';
+        }
+        if (hintBtn) {
+            hintBtn.disabled = false;
+        }
     }
 
     document.getElementById('feedback').classList.add('hidden');
