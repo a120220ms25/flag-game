@@ -2631,45 +2631,24 @@ function updateWorldMap() {
     // 計算各區域解鎖的國家數量
     const regionStats = calculateRegionStats();
 
-    // 更新SVG path元素的unlocked狀態
+    // 更新區域覆蓋層的unlocked狀態和進度文字
     Object.keys(regionStats).forEach(region => {
-        const pathElement = document.getElementById(`region-${region}`);
+        const regionElement = document.getElementById(`region-${region}`);
         const stat = regionStats[region];
 
-        if (pathElement) {
+        if (regionElement) {
             // 如果有解鎖任何國家，就標記為已解鎖
             if (stat.unlocked > 0) {
-                pathElement.classList.add('unlocked');
+                regionElement.classList.add('unlocked');
             } else {
-                pathElement.classList.remove('unlocked');
+                regionElement.classList.remove('unlocked');
             }
-        }
-    });
 
-    // 更新SVG進度文字
-    const regionNameMap = {
-        'north-america': '北美洲',
-        'south-america': '南美洲',
-        'europe': '歐洲',
-        'africa': '非洲',
-        'asia': '亞洲',
-        'oceania': '大洋洲'
-    };
-
-    Object.keys(regionStats).forEach(region => {
-        const regionName = regionNameMap[region];
-        const stat = regionStats[region];
-
-        // 找到對應的progress text元素並更新
-        const svg = document.querySelector('.world-map-svg');
-        if (svg) {
-            const texts = svg.querySelectorAll('.region-progress-text');
-            texts.forEach(text => {
-                const prevText = text.previousElementSibling;
-                if (prevText && prevText.textContent === regionName) {
-                    text.textContent = `${stat.unlocked}/${stat.total}`;
-                }
-            });
+            // 更新進度文字
+            const progressText = regionElement.querySelector('.region-progress-text');
+            if (progressText) {
+                progressText.textContent = `${stat.unlocked}/${stat.total}`;
+            }
         }
     });
 
