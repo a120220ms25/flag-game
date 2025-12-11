@@ -1773,7 +1773,7 @@ function createOptionButtons(options) {
 
     options.forEach(option => {
         const button = document.createElement('button');
-        button.className = 'option-btn';
+        button.className = 'pure-button option-btn';
         button.textContent = getCountryName(option);
         button.onclick = () => selectAnswer(option.name, button);
         optionsArea.appendChild(button);
@@ -2675,6 +2675,9 @@ function updateWorldMap() {
 
     // 更新總體統計
     updateMapStats();
+
+    // 更新已解鎖國旗展示
+    updateUnlockedFlags();
 }
 
 // 計算各區域統計
@@ -2750,6 +2753,59 @@ function updateMapStats() {
     document.getElementById('stages-completed').textContent = `${completedStages} / ${totalStages}`;
     document.getElementById('countries-unlocked').textContent = `${unlockedCountries.size} / ${totalCountries}`;
     document.getElementById('total-completion').textContent = `${completion}%`;
+}
+
+// 更新已解鎖國旗展示
+function updateUnlockedFlags() {
+    const container = document.getElementById('unlocked-flags-container');
+    if (!container) return;
+
+    // 獲取所有已解鎖的國家
+    const unlockedCountries = [];
+    gameState.completedStages.forEach(stageId => {
+        const stage = stageConfig.find(s => s.id === stageId);
+        if (stage) {
+            stage.countryIndices.forEach(index => {
+                if (!unlockedCountries.some(c => c.index === index)) {
+                    unlockedCountries.push({
+                        index: index,
+                        ...flagDatabase[index]
+                    });
+                }
+            });
+        }
+    });
+
+    // 清空容器
+    container.innerHTML = '';
+
+    // 如果沒有解鎖任何國家，顯示提示
+    if (unlockedCountries.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">開始闖關解鎖國家吧！🚀</div>';
+        return;
+    }
+
+    // 按照國家名稱排序
+    unlockedCountries.sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+
+    // 創建國旗項目
+    unlockedCountries.forEach(country => {
+        const flagItem = document.createElement('div');
+        flagItem.className = 'unlocked-flag-item';
+        flagItem.title = country.name;
+
+        const emoji = document.createElement('div');
+        emoji.className = 'unlocked-flag-emoji';
+        emoji.textContent = country.emoji;
+
+        const name = document.createElement('div');
+        name.className = 'unlocked-flag-name';
+        name.textContent = country.name;
+
+        flagItem.appendChild(emoji);
+        flagItem.appendChild(name);
+        container.appendChild(flagItem);
+    });
 }
 
 // 當通過關卡時顯示地圖解鎖動畫

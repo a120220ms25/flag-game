@@ -1569,6 +1569,61 @@ h2 {
     font-weight: 600;
 }
 
+/* 已解鎖國家展示 */
+.unlocked-countries {
+    background: white;
+    border: 2px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-top: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.unlocked-countries h3 {
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.unlocked-flags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.unlocked-flag-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.unlocked-flag-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(214, 147, 150, 0.3);
+}
+
+.unlocked-flag-emoji {
+    font-size: 2em;
+    line-height: 1;
+}
+
+.unlocked-flag-name {
+    font-size: 0.7em;
+    color: #666;
+    text-align: center;
+    font-weight: 500;
+}
+
 /* 手機版地圖樣式 */
 @media (max-width: 768px) {
     .map-toggle {
@@ -1631,5 +1686,28 @@ h2 {
 
     .stat-item {
         font-size: 0.9em;
+    }
+
+    .unlocked-countries {
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    .unlocked-countries h3 {
+        font-size: 1em;
+    }
+
+    .unlocked-flags-grid {
+        grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+        gap: 8px;
+        max-height: 180px;
+    }
+
+    .unlocked-flag-emoji {
+        font-size: 1.5em;
+    }
+
+    .unlocked-flag-name {
+        font-size: 0.6em;
     }
 }
