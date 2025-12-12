@@ -1699,10 +1699,10 @@ const flagDatabase = [
 
 // 國家在世界地圖上的坐標（百分比）
 const countryMapPositions = {
-    '台灣': { left: 81, top: 45 },
-    '中國': { left: 78, top: 38 },
-    '日本': { left: 85, top: 38 },
-    '韓國': { left: 83, top: 38 },
+    '台灣': { left: 81, top: 46 },
+    '中國': { left: 77, top: 40 },
+    '日本': { left: 86, top: 39 },
+    '南韓': { left: 83, top: 41 },
     '美國': { left: 18, top: 40 },
     '英國': { left: 47, top: 27 },
     '法國': { left: 48, top: 32 },
