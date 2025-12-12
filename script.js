@@ -1697,6 +1697,98 @@ const flagDatabase = [
     },
 ];
 
+// 國家在世界地圖上的坐標（百分比）
+const countryMapPositions = {
+    '台灣': { left: 81, top: 45 },
+    '中國': { left: 78, top: 38 },
+    '日本': { left: 85, top: 38 },
+    '韓國': { left: 83, top: 38 },
+    '美國': { left: 18, top: 40 },
+    '英國': { left: 47, top: 27 },
+    '法國': { left: 48, top: 32 },
+    '德國': { left: 50, top: 28 },
+    '義大利': { left: 51, top: 35 },
+    '西班牙': { left: 46, top: 37 },
+    '加拿大': { left: 18, top: 25 },
+    '澳洲': { left: 82, top: 73 },
+    '巴西': { left: 30, top: 65 },
+    '阿根廷': { left: 28, top: 80 },
+    '墨西哥': { left: 14, top: 45 },
+    '印度': { left: 68, top: 48 },
+    '泰國': { left: 75, top: 50 },
+    '越南': { left: 77, top: 50 },
+    '菲律賓': { left: 81, top: 51 },
+    '印尼': { left: 78, top: 57 },
+    '新加坡': { left: 76, top: 56 },
+    '馬來西亞': { left: 76, top: 54 },
+    '俄羅斯': { left: 70, top: 25 },
+    '土耳其': { left: 56, top: 38 },
+    '埃及': { left: 55, top: 47 },
+    '南非': { left: 54, top: 75 },
+    '肯亞': { left: 57, top: 57 },
+    '奈及利亞': { left: 49, top: 52 },
+    '荷蘭': { left: 49, top: 27 },
+    '比利時': { left: 49, top: 28 },
+    '瑞士': { left: 50, top: 31 },
+    '瑞典': { left: 52, top: 22 },
+    '挪威': { left: 51, top: 20 },
+    '丹麥': { left: 50, top: 25 },
+    '芬蘭': { left: 54, top: 21 },
+    '波蘭': { left: 53, top: 28 },
+    '捷克': { left: 52, top: 29 },
+    '奧地利': { left: 52, top: 31 },
+    '希臘': { left: 54, top: 37 },
+    '葡萄牙': { left: 45, top: 38 },
+    '愛爾蘭': { left: 46, top: 26 },
+    '紐西蘭': { left: 91, top: 80 },
+    '智利': { left: 27, top: 78 },
+    '秘魯': { left: 26, top: 64 },
+    '哥倫比亞': { left: 25, top: 54 },
+    '委內瑞拉': { left: 28, top: 52 },
+    '古巴': { left: 22, top: 46 },
+    '牙買加': { left: 23, top: 48 },
+    '以色列': { left: 57, top: 44 },
+    '沙烏地阿拉伯': { left: 60, top: 46 },
+    '阿聯酋': { left: 62, top: 47 },
+    '卡達': { left: 61, top: 47 },
+    '伊朗': { left: 63, top: 42 },
+    '伊拉克': { left: 60, top: 42 },
+    '巴基斯坦': { left: 65, top: 44 },
+    '孟加拉': { left: 71, top: 47 },
+    '緬甸': { left: 73, top: 48 },
+    '柬埔寨': { left: 76, top: 51 },
+    '寮國': { left: 75, top: 49 },
+    '尼泊爾': { left: 70, top: 45 },
+    '斯里蘭卡': { left: 69, top: 52 },
+    '哈薩克': { left: 64, top: 32 },
+    '烏茲別克': { left: 63, top: 37 },
+    '蒙古': { left: 77, top: 32 },
+    '北韓': { left: 83, top: 37 },
+    '阿富汗': { left: 64, top: 41 },
+    '摩洛哥': { left: 46, top: 43 },
+    '阿爾及利亞': { left: 49, top: 45 },
+    '突尼西亞': { left: 50, top: 41 },
+    '利比亞': { left: 53, top: 45 },
+    '蘇丹': { left: 56, top: 50 },
+    '衣索比亞': { left: 58, top: 53 },
+    '烏干達': { left: 56, top: 56 },
+    '坦尚尼亞': { left: 57, top: 60 },
+    '莫三比克': { left: 57, top: 67 },
+    '辛巴威': { left: 56, top: 68 },
+    '尚比亞': { left: 55, top: 65 },
+    '安哥拉': { left: 52, top: 65 },
+    '剛果民主共和國': { left: 54, top: 59 },
+    '喀麥隆': { left: 52, top: 54 },
+    '迦納': { left: 47, top: 54 },
+    '象牙海岸': { left: 47, top: 53 },
+    '塞內加爾': { left: 44, top: 50 },
+    '馬達加斯加': { left: 60, top: 69 },
+    '模里西斯': { left: 63, top: 69 },
+    '冰島': { left: 44, top: 20 },
+    '克羅埃西亞': { left: 52, top: 33 },
+    '斯洛維尼亞': { left: 52, top: 32 }
+};
+
 // 遊戲狀態
 let gameState = {
     playerName: '',    difficulty: 'beginner', // 保留以支援舊模式
@@ -2657,6 +2749,9 @@ function updateWorldMap() {
 
     // 更新已解鎖國旗展示
     updateUnlockedFlags();
+
+    // 更新地圖圖釘
+    updateMapPins();
 }
 
 // 計算各區域統計
@@ -2784,6 +2879,54 @@ function updateUnlockedFlags() {
         flagItem.appendChild(emoji);
         flagItem.appendChild(name);
         container.appendChild(flagItem);
+    });
+}
+
+// 更新地圖上的圖釘標記
+function updateMapPins() {
+    const container = document.getElementById('map-pins-container');
+    if (!container) return;
+
+    // 獲取所有已解鎖的國家
+    const unlockedCountries = [];
+    gameState.completedStages.forEach(stageId => {
+        const stage = stageConfig.find(s => s.id === stageId);
+        if (stage) {
+            stage.countryIndices.forEach(index => {
+                if (!unlockedCountries.some(c => c.index === index)) {
+                    unlockedCountries.push({
+                        index: index,
+                        ...flagDatabase[index]
+                    });
+                }
+            });
+        }
+    });
+
+    // 清空容器
+    container.innerHTML = '';
+
+    // 為每個已解鎖的國家創建圖釘
+    unlockedCountries.forEach((country, idx) => {
+        const position = countryMapPositions[country.name];
+
+        // 如果沒有坐標數據，跳過
+        if (!position) return;
+
+        const pin = document.createElement('div');
+        pin.className = 'map-pin';
+        pin.style.left = `${position.left}%`;
+        pin.style.top = `${position.top}%`;
+        pin.style.animationDelay = `${idx * 0.05}s`; // 依序出現
+        pin.textContent = '📍';
+
+        // 添加提示框
+        const tooltip = document.createElement('div');
+        tooltip.className = 'pin-tooltip';
+        tooltip.textContent = `${country.emoji} ${country.name}`;
+        pin.appendChild(tooltip);
+
+        container.appendChild(pin);
     });
 }
 
