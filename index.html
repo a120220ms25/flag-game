@@ -5,24 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>旗遇世界：國旗大冒險</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/pure-min.css" integrity="sha384-yHIFVG6ClnONEA5yB5DJXfW2/KC173DIQrYoZMEtBvGzmf0PKiGyNEqe9N6BNDBH" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body style="font-family: 'Press Start 2P', cursive; background-color: #209cee;">
     <!-- 品牌標誌 -->
     <div class="brand-logo">VIBECODING GAMES BY SABRINA</div>
 
-    <div class="container">
+    <div class="container nes-container is-dark">
         <!-- 音效開關按鈕 -->
-        <button id="sound-toggle" class="pure-button sound-toggle" onclick="toggleSound()" title="點擊關閉音效">🔊</button>
+        <button id="sound-toggle" class="nes-btn sound-toggle" onclick="toggleSound()" title="點擊關閉音效">
+            <i class="nes-icon is-small heart"></i>
+        </button>
 
         <!-- 世界地圖按鈕 -->
-        <button id="map-toggle" class="pure-button map-toggle" onclick="showWorldMap()" title="查看已解鎖的世界地圖">🗺️</button>
+        <button id="map-toggle" class="nes-btn map-toggle" onclick="showWorldMap()" title="查看已解鎖的世界地圖">
+            <i class="nes-icon is-small star"></i>
+        </button>
 
-        <h1 id="page-title">🌍 旗遇世界：國旗大冒險 🌍</h1>
+        <h1 id="page-title">
+            <i class="nes-icon trophy is-small"></i>
+            旗遇世界
+            <i class="nes-icon trophy is-small"></i>
+        </h1>
 
         <!-- 遊戲開始畫面 -->
         <div id="start-screen">
@@ -31,17 +37,21 @@
                 <p id="welcome-subtitle">「知識，就是你的護照。一起環遊世界，收集所有光榮。」</p>
 
                 <!-- 名稱輸入 -->
-                <div class="name-input-section">
-                    <label id="name-label">請輸入您的名稱：</label>
-                    <input type="text" id="name-input" class="pure-input-1" placeholder="輸入名稱" maxlength="20">
+                <div class="name-input-section nes-field">
+                    <label id="name-label" for="name-input">玩家名稱：</label>
+                    <input type="text" id="name-input" class="nes-input" placeholder="輸入名稱" maxlength="20">
                 </div>
 
-                <button id="enter-stage-btn" class="pure-button btn btn-primary" onclick="enterStageSelect()">🎮 進入闖關模式</button>
-                <button id="daily-challenge-btn" class="pure-button btn btn-daily" onclick="startDailyChallenge()">
-                    <span id="daily-challenge-text">📅 每日挑戰</span>
+                <button id="enter-stage-btn" class="nes-btn is-primary btn" onclick="enterStageSelect()">
+                    <i class="nes-icon coin is-small"></i> 進入闖關
+                </button>
+                <button id="daily-challenge-btn" class="nes-btn is-warning btn" onclick="startDailyChallenge()">
+                    <i class="nes-icon star is-small"></i> <span id="daily-challenge-text">每日挑戰</span>
                     <span id="daily-status" class="daily-status"></span>
                 </button>
-                <button id="clear-progress-btn" class="pure-button btn btn-secondary" onclick="ProgressManager.clearAllProgress()" style="font-size: 0.85em; padding: 8px 16px; margin-top: 10px;">🗑️ <span id="clear-progress-text">清除所有進度</span></button>
+                <button id="clear-progress-btn" class="nes-btn is-error btn" onclick="ProgressManager.clearAllProgress()">
+                    <span id="clear-progress-text">清除進度</span>
+                </button>
             </div>
         </div>
 
@@ -54,7 +64,7 @@
                 <!-- 關卡將由 JavaScript 動態生成 -->
             </div>
 
-            <button id="back-to-start-btn" class="pure-button btn btn-secondary" onclick="backToStart()">返回</button>
+            <button id="back-to-start-btn" class="nes-btn btn" onclick="backToStart()">返回</button>
         </div>
 
         <!-- 遊戲進行畫面 -->
@@ -109,15 +119,21 @@
 
             <!-- 提示按鈕區 -->
             <div class="hint-buttons">
-                <button id="hint-btn-1" class="pure-button btn btn-hint" onclick="showHint(1)">提示 1</button>
-                <button id="hint-btn-2" class="pure-button btn btn-hint" onclick="showHint(2)">提示 2</button>
-                <button id="hint-btn-3" class="pure-button btn btn-hint" onclick="showHint(3)">提示 3</button>
+                <button id="hint-btn-1" class="nes-btn is-warning btn btn-hint" onclick="showHint(1)">
+                    <i class="nes-icon coin is-small"></i> 提示 1
+                </button>
+                <button id="hint-btn-2" class="nes-btn is-warning btn btn-hint" onclick="showHint(2)">
+                    <i class="nes-icon coin is-small"></i> 提示 2
+                </button>
+                <button id="hint-btn-3" class="nes-btn is-warning btn btn-hint" onclick="showHint(3)">
+                    <i class="nes-icon coin is-small"></i> 提示 3
+                </button>
             </div>
 
             <!-- 下一題和停止按鈕 -->
             <div class="game-control-buttons">
-                <button id="next-btn" class="pure-button btn btn-primary hidden" onclick="nextQuestion()">下一題</button>
-                <button id="quit-btn" class="pure-button btn btn-secondary" onclick="quitChallenge()">⏸️ 停止挑戰</button>
+                <button id="next-btn" class="nes-btn is-success btn btn-primary hidden" onclick="nextQuestion()">下一題</button>
+                <button id="quit-btn" class="nes-btn is-error btn btn-secondary" onclick="quitChallenge()">停止</button>
             </div>
         </div>
 
@@ -136,9 +152,13 @@
                 </div>
             </div>
             <div class="end-buttons">
-                <button id="next-stage-btn" class="pure-button btn btn-primary hidden" onclick="goToNextStage()">🚀 前往下一關</button>
-                <button id="back-to-stage-btn" class="pure-button btn btn-primary" onclick="backToStageSelect()">返回關卡選擇</button>
-                <button id="share-game-btn" class="pure-button btn btn-secondary" onclick="shareGame()">📤 分享遊戲</button>
+                <button id="next-stage-btn" class="nes-btn is-success btn btn-primary hidden" onclick="goToNextStage()">
+                    <i class="nes-icon star is-small"></i> 下一關
+                </button>
+                <button id="back-to-stage-btn" class="nes-btn is-primary btn" onclick="backToStageSelect()">返回選關</button>
+                <button id="share-game-btn" class="nes-btn btn" onclick="shareGame()">
+                    <i class="nes-icon like is-small"></i> 分享
+                </button>
             </div>
         </div>
 
@@ -147,23 +167,23 @@
             <h2 id="leaderboard-title">🏆 排行榜</h2>
 
             <!-- 難度選擇器 -->
-            <div class="leaderboard-filter pure-button-group" role="group">
-                <button class="pure-button filter-btn active" onclick="filterLeaderboard('all', this)">
+            <div class="leaderboard-filter" role="group">
+                <button class="nes-btn filter-btn active" onclick="filterLeaderboard('all', this)">
                     <span id="filter-all">全部</span>
                 </button>
-                <button class="pure-button filter-btn" onclick="filterLeaderboard('beginner', this)">
+                <button class="nes-btn filter-btn" onclick="filterLeaderboard('beginner', this)">
                     <span id="filter-beginner">初級</span>
                 </button>
-                <button class="pure-button filter-btn" onclick="filterLeaderboard('intermediate', this)">
+                <button class="nes-btn filter-btn" onclick="filterLeaderboard('intermediate', this)">
                     <span id="filter-intermediate">中級</span>
                 </button>
-                <button class="pure-button filter-btn" onclick="filterLeaderboard('advanced', this)">
+                <button class="nes-btn filter-btn" onclick="filterLeaderboard('advanced', this)">
                     <span id="filter-advanced">高級</span>
                 </button>
             </div>
 
             <div class="leaderboard-content">
-                <table id="leaderboard-table" class="pure-table pure-table-horizontal pure-table-striped">
+                <table id="leaderboard-table" class="nes-table is-bordered is-centered">
                     <thead>
                         <tr>
                             <th>排名</th>
@@ -177,7 +197,7 @@
                     </tbody>
                 </table>
             </div>
-            <button id="back-btn" class="pure-button btn btn-primary" onclick="backToStart()">返回遊戲</button>
+            <button id="back-btn" class="nes-btn is-primary btn" onclick="backToStart()">返回</button>
         </div>
 
         <!-- 世界地圖畫面 -->
@@ -270,7 +290,7 @@
                 </div>
             </div>
 
-            <button id="back-from-map-btn" class="pure-button btn btn-primary" onclick="closeWorldMap()">返回</button>
+            <button id="back-from-map-btn" class="nes-btn is-primary btn" onclick="closeWorldMap()">返回</button>
         </div>
     </div>
 
