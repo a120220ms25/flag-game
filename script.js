@@ -1865,7 +1865,7 @@ function createOptionButtons(options) {
 
     options.forEach(option => {
         const button = document.createElement('button');
-        button.className = 'nes-btn is-primary option-btn';
+        button.className = 'pure-button option-btn';
         button.textContent = getCountryName(option);
         button.onclick = () => selectAnswer(option.name, button);
         optionsArea.appendChild(button);
@@ -2027,7 +2027,7 @@ function renderStages() {
         const isUnlocked = stage.id <= gameState.unlockedStages;
         const isCompleted = gameState.completedStages.includes(stage.id); // 是否已通過
         const card = document.createElement('div');
-        card.className = `stage-card nes-container ${isUnlocked ? 'is-rounded unlocked' : 'is-dark locked'}`;
+        card.className = `stage-card ${isUnlocked ? 'unlocked' : 'locked'}`;
 
         if (isUnlocked) {
             card.onclick = () => startStage(stage.id);
