@@ -1,5 +1,5 @@
 // 遊戲網址設定（部署後請更新此連結）
-const GAME_URL = 'YOUR_DEPLOYED_GAME_URL_HERE'; // 部署後請將此連結替換為實際網址
+const GAME_URL = 'https://a120220ms25.github.io/flag-game/'; // GitHub Pages 部署網址
 
 // ============ 音效系統 ============
 const SoundManager = {
